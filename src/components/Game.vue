@@ -17,6 +17,8 @@
         <svg id='game' ref='game' preserveAspectRatio='xMidYMid meet' viewBox='0 0 300 300'></svg>
       </div>
       <div>
+        <h1 v-if='myTurn'>Your turn</h1>
+        <h1 v-else>Waiting for opponent's move</h1>
         <span>You : {{ myScore }}</span><br/>
         <span>Opponent : {{ opponentScore }}</span>
       </div>
@@ -47,13 +49,13 @@ export default {
   name: 'Game',
   friend: null,
   p2pt: null,
-  turn: null,
   data () {
     return {
       friendName: '',
       gameName: 'ckO2',
       status: 'Connecting...',
       myScore: 0,
+      myTurn: false,
       opponentScore: 0
     }
   },
@@ -68,7 +70,8 @@ export default {
 
         this.p2pt.send(peer, JSON.stringify({
           type: 'name',
-          name: localStorage.getItem('name')
+          name: localStorage.getItem('name'),
+          
         }))
 
         $this.status = 'Connected to peer'
@@ -81,13 +84,13 @@ export default {
       this.p2pt.on('msg', (peer, msg) => {
         msg = JSON.parse(msg)
 
-        console.log(msg)
-
         if (msg.type === 'move') {
           var line = msg.line === 'h' ? 'hline' : 'vline'
           var [row, col] = msg.move.split('-')
 
           $this.activateLine($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'), true)
+
+          $this.myTurn = true
         } else if (msg.type === 'name') {
           $this.friendName = msg.name
         }
@@ -186,6 +189,10 @@ export default {
       var elem = e.target
 
       if (elem.classList.contains('line')) {
+        if (!this.myTurn || elem.classList.contains('active')) {
+          return false
+        }
+        
         // It's a line
         this.activateLine(elem)
 
@@ -194,6 +201,8 @@ export default {
           line: elem.classList.contains('hline') ? 'h' : 'v',
           move: elem.id
         }))
+
+        this.myTurn = false
       }
     },
     activateLine (line, friend = false) {
@@ -323,8 +332,14 @@ export default {
     this.gameName = localStorage.getItem('gameName')
     if (this.gameName === '0') {
       this.gameName = Math.random().toString(36).substring(7)
+      localStorage.setItem('initiator', true)
       localStorage.setItem('gameName', this.gameName)
     }
+
+    if (localStorage.getItem('initiator')) {
+      this.myTurn = true
+    }
+
     this.connect()
   }
 }
