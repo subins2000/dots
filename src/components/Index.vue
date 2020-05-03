@@ -29,8 +29,10 @@ export default {
         alert("Please Enter Valid Game Name")
         this.$router.push('')
       }
-      localStorage.setItem('gameName',this.gname)
-      this.$router.push('register')
+      else{
+        localStorage.setItem('gameName',this.gname)
+        this.$router.push('register')
+      }
     }
   }
 }
