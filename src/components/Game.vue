@@ -2,11 +2,11 @@
   <div>
     <div id='header'>
       <div class='container'>
-        <div class='columns'>
-          <div class='column is-four-fifths'>
+        <div class='columns is-mobile'>
+          <div class='column is-half'>
             {{ gameName }} : {{ status }}
           </div>
-          <div class='column'>
+          <div class='column' style='text-align: right;'>
             <span>Playing with {{ friendName }}</span>
           </div>
         </div>
@@ -14,11 +14,23 @@
     </div>
     <div class='container'>
       <div id='game-wrapper'>
-        <svg id='game' ref='game' preserveAspectRatio='xMidYMid meet' viewBox='0 0 300 300'></svg>
+        <svg id='game' ref='game' viewBox='0 0 280 280'></svg>
       </div>
       <div>
-        <span>You : {{ myScore }}</span><br/>
-        <span>Opponent : {{ opponentScore }}</span>
+        <div class='scoreboard'>
+          <div class='columns is-mobile'>
+            <div class='column' v-bind:class="{ active: myTurn }">{{ myName }}</div>
+            <div class='column' v-bind:class="[!myTurn ? 'active' : '']">{{ friendName }}</div>
+          </div>
+          <div class='columns is-mobile'>
+            <div class='column'>{{ myScore }}</div>
+            <div class='column'>{{ opponentScore }}</div>
+          </div>
+        </div><br/>
+        <center>
+          <span v-if='myTurn'>Your turn</span>
+          <span v-else>Waiting for opponent's move</span>
+        </center>
       </div>
     </div>
   </div>
@@ -47,13 +59,14 @@ export default {
   name: 'Game',
   friend: null,
   p2pt: null,
-  turn: null,
   data () {
     return {
+      myName: localStorage.getItem('name'),
       friendName: '',
       gameName: 'ckO2',
       status: 'Connecting...',
       myScore: 0,
+      myTurn: false,
       opponentScore: 0
     }
   },
@@ -68,7 +81,7 @@ export default {
 
         this.p2pt.send(peer, JSON.stringify({
           type: 'name',
-          name: localStorage.getItem('name')
+          name: this.myName
         }))
 
         $this.status = 'Connected to peer'
@@ -81,13 +94,13 @@ export default {
       this.p2pt.on('msg', (peer, msg) => {
         msg = JSON.parse(msg)
 
-        console.log(msg)
-
         if (msg.type === 'move') {
           var line = msg.line === 'h' ? 'hline' : 'vline'
           var [row, col] = msg.move.split('-')
 
           $this.activateLine($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'), true)
+
+          $this.myTurn = true
         } else if (msg.type === 'name') {
           $this.friendName = msg.name
         }
@@ -186,6 +199,10 @@ export default {
       var elem = e.target
 
       if (elem.classList.contains('line')) {
+        if (!this.myTurn || elem.classList.contains('active')) {
+          return false
+        }
+        
         // It's a line
         this.activateLine(elem)
 
@@ -194,6 +211,8 @@ export default {
           line: elem.classList.contains('hline') ? 'h' : 'v',
           move: elem.id
         }))
+
+        this.myTurn = false
       }
     },
     activateLine (line, friend = false) {
@@ -323,8 +342,14 @@ export default {
     this.gameName = localStorage.getItem('gameName')
     if (this.gameName === '0') {
       this.gameName = Math.random().toString(36).substring(7)
+      localStorage.setItem('initiator', true)
       localStorage.setItem('gameName', this.gameName)
     }
+
+    if (localStorage.getItem('initiator')) {
+      this.myTurn = true
+    }
+
     this.connect()
   }
 }
@@ -366,5 +391,24 @@ export default {
 
 #game .line.active.friend {
   stroke: #a519dd
+}
+
+.scoreboard {
+  display: table;
+  margin: 0 auto;
+}
+
+.scoreboard .column {
+  border-radius: 20px;
+  padding: 0.5em;
+  background: #EEE;
+  border: 1px dashed #000;
+  text-align: center;
+  min-width: 100px;
+}
+
+.scoreboard .column.active {
+  background: #00d1b2;
+  color: #fff;
 }
 </style>
