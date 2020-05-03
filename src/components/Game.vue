@@ -1,13 +1,39 @@
 <template>
-  <div class='container'>
-    <div id='game-wrapper'>
-      <svg id='game' ref='game' preserveAspectRatio='xMidYMid meet' viewBox='0 0 300 300'></svg>
+  <div>
+    <div id='header'>
+      <div class='container'>
+        <div class='columns'>
+          <div class='column is-four-fifths'>
+            {{ status }}
+          </div>
+          <div class='column'>
+            <span>Playing with {{ friend }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='container'>
+      <div id='game-wrapper'>
+        <svg id='game' ref='game' preserveAspectRatio='xMidYMid meet' viewBox='0 0 300 300'></svg>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import * as d3 from 'd3'
+import { P2PT } from 'p2pt'
+
+let announceURLs = [
+  "wss://tracker.openwebtorrent.com",
+  "wss://tracker.sloppyta.co:443/announce",
+  "wss://tracker.novage.com.ua:443/announce",
+  "wss://tracker.btorrent.xyz:443/announce",
+]
+
+if (window.location.hostname === "localhost") {
+  announceURLs = ["ws://localhost:5000"]
+}
 
 var gridSize = 6
 var cellWidth = 40
@@ -17,10 +43,14 @@ export default {
   name: 'Game',
   data () {
     return {
-
+      friend: '',
+      status: 'Connecting...'
     }
   },
   methods: {
+    connect () {
+      this.p2pt = new P2PT(announceURLs, 'vett' + this.roomName)
+    },
     makeGameBoard () {
       this.svg.attr('width', '100%')
       this.svg.attr('height', '100%')
@@ -224,12 +254,25 @@ export default {
     this.game = this.$refs.game
     this.svg = d3.select(this.$refs.game)
     this.makeGameBoard()
+    this.connect()
   }
 }
 </script>
 
 <!-- Add 'scoped' attribute to limit CSS to this component only -->
 <style>
+#header {
+  padding: 1em;
+  background-color: #00d1b2;
+  color: #fff;
+}
+
+#game-wrapper {
+  height: 60vh;
+  width: 60vh;
+  margin: 20px auto;
+}
+
 #game .cell {
   fill: #EEE
 }
@@ -244,11 +287,5 @@ export default {
 
 #game .line.active {
   stroke: #CF649A
-}
-
-#game-wrapper {
-  height: 60vh;
-  width: 60vh;
-  margin: 20px auto;
 }
 </style>
