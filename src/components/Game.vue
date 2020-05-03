@@ -193,6 +193,7 @@ export default {
         if (box) {
           box = this.game.querySelector('.cell[id="' + id + '"]')
           box.classList.add('active')
+          box.classList.add(friend ? 'friend' : 'me')
         }
       }
     },
@@ -327,6 +328,10 @@ export default {
   fill: #ffa7d3
 }
 
+#game .cell.active.friend {
+  fill: #d978ff
+}
+
 #game .line {
   stroke: #BBB
 }
@@ -336,6 +341,6 @@ export default {
 }
 
 #game .line.active.friend {
-  stroke: rgb(165, 25, 221)
+  stroke: #a519dd
 }
 </style>
