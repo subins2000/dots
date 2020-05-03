@@ -43,6 +43,7 @@ export default {
   name: 'Game',
   friend: null,
   p2pt: null,
+  turn: null,
   data () {
     return {
       friendName: '',
@@ -74,7 +75,7 @@ export default {
 
           console.log($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'))
 
-          $this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]').dispatchEvent(new Event('click'))
+          $this.activateLine($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'), true)
         }
       })
 
@@ -172,22 +173,27 @@ export default {
 
       if (elem.classList.contains('line')) {
         // It's a line
-        elem.classList.add('active')
-        var completedBoxes = this.boxComplete(elem)
-        var box
-        for (var id in completedBoxes) {
-          box = completedBoxes[id]
-          if (box) {
-            box = this.game.querySelector('.cell[id="' + id + '"]')
-            box.classList.add('active')
-          }
-        }
+        this.activateLine(elem)
 
         this.p2pt.send(this.friend, JSON.stringify({
           type: 'move',
           line: elem.classList.contains('hline') ? 'h' : 'v',
-          move: id
+          move: elem.id
         }))
+      }
+    },
+    activateLine (line, friend = false) {
+      line.classList.add('active')
+      line.classList.add(friend ? 'friend' : 'me')
+
+      var completedBoxes = this.boxComplete(line)
+      var box
+      for (var id in completedBoxes) {
+        box = completedBoxes[id]
+        if (box) {
+          box = this.game.querySelector('.cell[id="' + id + '"]')
+          box.classList.add('active')
+        }
       }
     },
     boxComplete (activeLine) {
@@ -327,5 +333,9 @@ export default {
 
 #game .line.active {
   stroke: #CF649A
+}
+
+#game .line.active.friend {
+  stroke: rgb(165, 25, 221)
 }
 </style>
