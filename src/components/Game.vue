@@ -4,10 +4,10 @@
       <div class='container'>
         <div class='columns'>
           <div class='column is-four-fifths'>
-            {{ status }}
+            {{ gameName }} : {{ status }}
           </div>
           <div class='column'>
-            <span>Playing with {{ friend }}</span>
+            <span>Playing with {{ friendName }}</span>
           </div>
         </div>
       </div>
@@ -24,7 +24,7 @@
 import * as d3 from 'd3'
 import { P2PT } from 'p2pt'
 
-let announceURLs = [
+var announceURLs = [
   "wss://tracker.openwebtorrent.com",
   "wss://tracker.sloppyta.co:443/announce",
   "wss://tracker.novage.com.ua:443/announce",
@@ -41,15 +41,44 @@ var cellMargin = 5
 
 export default {
   name: 'Game',
+  friend: null,
+  p2pt: null,
   data () {
     return {
-      friend: '',
+      friendName: '',
+      gameName: 'ckO2',
       status: 'Connecting...'
     }
   },
   methods: {
     connect () {
-      this.p2pt = new P2PT(announceURLs, 'vett' + this.roomName)
+      this.p2pt = new P2PT(announceURLs, 'vett' + this.gameName)
+
+      const $this = this
+
+      this.p2pt.on('peerconnect', (peer) => {
+        $this.friend = peer
+        $this.status = 'Connected to peer'
+      })
+
+      this.p2pt.on('peerclose', (peer) => {
+        $this.status = 'Connection lost'
+      })
+
+      this.p2pt.on('msg', (peer, msg) => {
+        msg = JSON.parse(msg)
+
+        if (msg.type === 'move') {
+          var line = msg.line === 'h' ? 'hline' : 'vline'
+          var [row, col] = msg.move.split('-')
+
+          console.log($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'))
+
+          $this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]').dispatchEvent(new Event('click'))
+        }
+      })
+
+      this.p2pt.start()
     },
     makeGameBoard () {
       this.svg.attr('width', '100%')
@@ -133,7 +162,10 @@ export default {
       }
 
       // Add events
-      this.game.addEventListener('click', this.onClick)
+      const $this = this
+      this.game.querySelectorAll('.line').forEach((elem) => {
+        elem.addEventListener('click', $this.onClick)
+      })
     },
     onClick (e) {
       var elem = e.target
@@ -150,6 +182,12 @@ export default {
             box.classList.add('active')
           }
         }
+
+        this.p2pt.send(this.friend, JSON.stringify({
+          type: 'move',
+          line: elem.classList.contains('hline') ? 'h' : 'v',
+          move: id
+        }))
       }
     },
     boxComplete (activeLine) {
@@ -254,6 +292,8 @@ export default {
     this.game = this.$refs.game
     this.svg = d3.select(this.$refs.game)
     this.makeGameBoard()
+
+    //this.gameName = Math.random().toString(36).substring(7)
     this.connect()
   }
 }

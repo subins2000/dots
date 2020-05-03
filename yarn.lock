@@ -5241,10 +5241,10 @@ p-try@^1.0.0:
   resolved "https://registry.yarnpkg.com/p-try/-/p-try-1.0.0.tgz#cbc79cdbaf8fd4228e13f621f2b1a237c1b207b3"
   integrity sha1-y8ec26+P1CKOE/Yh8rGiN8GyB7M=
 
-p2pt@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/p2pt/-/p2pt-1.1.1.tgz#9bdb0e3015c76e18359af534b187b4ec7a6c4a7a"
-  integrity sha512-iD3kGhPvq5VgXYruv9aA8vYG8Cxgast/V5Z96aacDHV1gk6qvvHNnhTPdqnGoTGmdf1NeOXFZcuC8Mc/1sMm5A==
+p2pt@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/p2pt/-/p2pt-1.1.2.tgz#d0c32686e0b902681599310e04626390de49ecb8"
+  integrity sha512-gzdfgBmsk7S7voxpf52emAY9DAcV6Z8Wn7kqr4nXzapcJtlDnGXCGdzNjR/0+HK3vxv7rkRl5GYiClzE/2ITnw==
   dependencies:
     bittorrent-tracker "^9.14.5"
     randombytes "^2.1.0"
