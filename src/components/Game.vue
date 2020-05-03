@@ -247,8 +247,8 @@ export default {
 }
 
 #game-wrapper {
-  height: 46vh;
-  width: 46vh;
+  height: 60vh;
+  width: 60vh;
   margin: 20px auto;
 }
 </style>
