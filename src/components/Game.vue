@@ -4,7 +4,7 @@
       <div class='container'>
         <div class='columns is-mobile'>
           <div class='column is-half'>
-            {{ gameName }} : {{ status }}
+           {{ gameName }} : {{ status }} <span><b-button size="is-small" type="is-text" outlined @click="clickMe" v-clipboard="gameName">Copy Game Code</b-button> </span>
           </div>
           <div class='column' style='text-align: right;'>
             <span>Playing with {{ friendName }}</span>
@@ -71,6 +71,14 @@ export default {
     }
   },
   methods: {
+    clickMe() {
+       this.$buefy.toast.open({
+          duration: 2000,
+          message: `Game Code Copied !!!`,
+          position: 'is-top',
+          type: 'is-primary'
+      })
+    },
     connect () {
       this.p2pt = new P2PT(announceURLs, 'vett' + this.gameName)
 
