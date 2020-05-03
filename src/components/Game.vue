@@ -66,7 +66,7 @@ export default {
       this.p2pt.on('peerconnect', (peer) => {
         $this.friend = peer
 
-        peer.send(JSON.stringify({
+        this.p2pt.send(peer, JSON.stringify({
           type: 'name',
           name: localStorage.getItem('name')
         }))
@@ -80,6 +80,8 @@ export default {
 
       this.p2pt.on('msg', (peer, msg) => {
         msg = JSON.parse(msg)
+
+        console.log(msg)
 
         if (msg.type === 'move') {
           var line = msg.line === 'h' ? 'hline' : 'vline'
@@ -318,7 +320,11 @@ export default {
     this.svg = d3.select(this.$refs.game)
     this.makeGameBoard()
 
-    //this.gameName = Math.random().toString(36).substring(7)
+    this.gameName = localStorage.getItem('gameName')
+    if (this.gameName === '0') {
+      this.gameName = Math.random().toString(36).substring(7)
+      localStorage.setItem('gameName', this.gameName)
+    }
     this.connect()
   }
 }
