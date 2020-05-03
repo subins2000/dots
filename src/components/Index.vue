@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="container has-text-centered">
-    <h1 class="title is-1">{{ msg }}</h1>
+    <h1 class="title is-1">Welcome to Vett</h1>
    <input type="text" class="input" name="name" v-model="gname" placeholder="Paste the Game Name here and Press Enter" @keyup.enter="join" /><br/><br/>
    <strong class="is-primary has-text-centered">OR</strong><br/>
     </div><br/>
