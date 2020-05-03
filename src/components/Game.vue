@@ -1,113 +1,99 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li>
-        <a
-          href="https://vuejs.org"
-          target="_blank"
-        >
-          Core Docs
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://forum.vuejs.org"
-          target="_blank"
-        >
-          Forum
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://chat.vuejs.org"
-          target="_blank"
-        >
-          Community Chat
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://twitter.com/vuejs"
-          target="_blank"
-        >
-          Twitter
-        </a>
-      </li>
-      <br>
-      <li>
-        <a
-          href="http://vuejs-templates.github.io/webpack/"
-          target="_blank"
-        >
-          Docs for This Template
-        </a>
-      </li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li>
-        <a
-          href="http://router.vuejs.org/"
-          target="_blank"
-        >
-          vue-router
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vuex.vuejs.org/"
-          target="_blank"
-        >
-          vuex
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vue-loader.vuejs.org/"
-          target="_blank"
-        >
-          vue-loader
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-        >
-          awesome-vue
-        </a>
-      </li>
-    </ul>
+  <div class='container'>
+    <div id='game-wrapper'>
+      <svg id='game' ref='game' preserveAspectRatio='xMidYMid meet' viewBox='0 0 300 300'></svg>
+    </div>
   </div>
 </template>
 
 <script>
+import * as d3 from 'd3'
+
+var gridSize = 6
+var cellWidth = 40
+var cellMargin = 5
+
 export default {
   name: 'Game',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+
     }
+  },
+  methods: {
+    makeGameBoard () {
+      this.svg.attr('width', '100%')
+      this.svg.attr('height', '100%')
+
+      // Add a bit margin
+      var game = this.svg.append('g')
+        .attr('transform', 'translate(10, 10)')
+
+      var row, cell
+      for (var i = 0; i < gridSize; i++) {
+        // Make grid
+        row = game.append('g')
+          .attr('class', 'row')
+          .attr('transform', () => {
+            return 'translate(0, ' + cellWidth * i + ')'
+          })
+        for (var j = 0; j < gridSize; j++) {
+          cell = row.append('g')
+            .attr('class', 'col')
+            .attr('transform', () => {
+              return 'translate(' + cellWidth * j + ', 0)'
+            })
+          
+          // Add box
+          cell.append('rect')
+            .attr('class', 'cell')
+            .attr('width', cellWidth - cellMargin)
+            .attr('height', cellWidth - cellMargin)
+            .attr('x', cellMargin - 3)
+            .attr('y', cellMargin - 3)
+          
+          // Add lines
+          cell.append('line')
+            .attr('class', 'vline')
+            .attr('y1', cellMargin)
+            .attr('y2', cellWidth - cellMargin)
+            .attr('x1', 0)
+            .attr('x2', 0)
+            .attr('stroke-width', cellMargin)
+            .attr('stroke-linecap', 'round')
+          
+          cell.append('line')
+            .attr('class', 'hline')
+            .attr('x1', cellMargin)
+            .attr('x2', cellWidth - cellMargin)
+            .attr('y1', 0)
+            .attr('y2', 0)
+            .attr('stroke-width', cellMargin)
+            .attr('stroke-linecap', 'round')
+        }
+      }
+    }
+  },
+  mounted () {
+    this.svg = d3.select(this.$refs.game)
+    this.makeGameBoard()
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h1, h2 {
-  font-weight: normal;
+<!-- Add 'scoped' attribute to limit CSS to this component only -->
+<style>
+#game .cell {
+  fill: #EEE
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+#game .hline, #game .vline {
+  stroke: #BBB
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+
+#game-wrapper {
+  height: 46vh;
+  width: 46vh;
+  margin: 20px auto;
 }
 </style>
