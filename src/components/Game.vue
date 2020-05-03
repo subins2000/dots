@@ -16,6 +16,10 @@
       <div id='game-wrapper'>
         <svg id='game' ref='game' preserveAspectRatio='xMidYMid meet' viewBox='0 0 300 300'></svg>
       </div>
+      <div>
+        <span>You : {{ myScore }}</span><br/>
+        <span>Opponent : {{ opponentScore }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -48,7 +52,9 @@ export default {
     return {
       friendName: '',
       gameName: 'ckO2',
-      status: 'Connecting...'
+      status: 'Connecting...',
+      myScore: 0,
+      opponentScore: 0
     }
   },
   methods: {
@@ -59,6 +65,12 @@ export default {
 
       this.p2pt.on('peerconnect', (peer) => {
         $this.friend = peer
+
+        peer.send(JSON.stringify({
+          type: 'name',
+          name: localStorage.getItem('name')
+        }))
+
         $this.status = 'Connected to peer'
       })
 
@@ -73,9 +85,9 @@ export default {
           var line = msg.line === 'h' ? 'hline' : 'vline'
           var [row, col] = msg.move.split('-')
 
-          console.log($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'))
-
           $this.activateLine($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'), true)
+        } else if (msg.type === 'name') {
+          $this.friendName = msg.name
         }
       })
 
@@ -194,6 +206,12 @@ export default {
           box = this.game.querySelector('.cell[id="' + id + '"]')
           box.classList.add('active')
           box.classList.add(friend ? 'friend' : 'me')
+
+          if (friend) {
+            this.opponentScore++
+          } else {
+            this.myScore++
+          }
         }
       }
     },
