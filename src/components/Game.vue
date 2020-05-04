@@ -208,6 +208,12 @@ export default {
             .attr('stroke-width', cellMargin)
             .attr('stroke-linecap', 'round')
             .attr('id', i + '-' + j)
+          
+          cell.append('circle')
+            .attr('class', 'dot')
+            .attr('cx', 0)
+            .attr('cy', 0)
+            .attr('r', cellMargin)
 
           // Add horizontal line below last row elems
           if (i == gridSize - 1) {
@@ -220,6 +226,12 @@ export default {
               .attr('stroke-width', cellMargin)
               .attr('stroke-linecap', 'round')
               .attr('id', (i + 1) + '-' + j)
+
+            cell.append('circle')
+              .attr('class', 'dot')
+              .attr('cx', 0)
+              .attr('cy', cellWidth)
+              .attr('r', cellMargin)
           }
 
           // Add vertical line on right of last column elems
@@ -233,6 +245,19 @@ export default {
               .attr('stroke-width', cellMargin)
               .attr('stroke-linecap', 'round')
               .attr('id', i + '-' + (j + 1))
+
+            cell.append('circle')
+              .attr('class', 'dot')
+              .attr('cx', cellWidth)
+              .attr('cy', 0)
+              .attr('r', cellMargin)
+            
+            // The last dot in the bottom-right corner
+            cell.append('circle')
+              .attr('class', 'dot')
+              .attr('cx', cellWidth)
+              .attr('cy', cellWidth)
+              .attr('r', cellMargin)
           }
         }
       }
@@ -475,27 +500,32 @@ svg text::selection {
 }
 
 #game .cell {
-  fill: #EEE
+  fill: #EEE;
 }
 
 #game .cell.active {
-  fill: #ffa7d3
+  fill: #ffa7d3;
 }
 
 #game .cell.active.friend {
-  fill: #d978ff
+  fill: #d978ff;
+}
+
+#game .dot {
+  stroke: #BBB;
+  fill: #fff;
 }
 
 #game .line {
-  stroke: #BBB
+  stroke: #BBB;
 }
 
 #game .line.active {
-  stroke: #CF649A
+  stroke: #CF649A;
 }
 
 #game .line.active.friend {
-  stroke: #a519dd
+  stroke: #a519dd;
 }
 
 .scoreboard {
