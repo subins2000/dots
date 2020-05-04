@@ -30,15 +30,18 @@ export default {
   methods: {
     newGame () {
       this.$router.push('register')
-      localStorage.setItem('gameCode', 0) // 0 indicates new game
+
+      var gameCode = Math.random().toString(36).substr(2, this.$GAME_CODE_LENGTH)
+
+      localStorage.setItem('gameCreator', true)
+      localStorage.setItem('gameCode', gameCode)
     },
 
     joinGame (e) {
       e.preventDefault()
 
-      if (this.gameCode.length !== 6) {
+      if (this.gameCode.length !== this.$GAME_CODE_LENGTH) {
         this.$buefy.toast.open('Please enter valid Game Code')
-        this.$router.push('')
       } else {
         localStorage.setItem('gameCode', this.gameCode)
         this.$router.push('register')
@@ -47,7 +50,7 @@ export default {
   },
 
   mounted () {
-    localStorage.removeItem('initiator')
+    localStorage.removeItem('gameCreator')
     localStorage.removeItem('gameCode')
   }
 }

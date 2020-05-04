@@ -36,6 +36,12 @@ export default {
 
       this.$router.push('game')
     }
+  },
+
+  mounted () {
+    if (!localStorage.getItem('gameCode') || localStorage.getItem('gameCode').length !== this.$GAME_CODE_LENGTH) {
+      this.$router.push('/')
+    }
   }
 }
 </script>

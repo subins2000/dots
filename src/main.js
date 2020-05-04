@@ -20,6 +20,8 @@ Vue.use(VueClipboard)
 Vue.component('GameTitle', GameTitle)
 Vue.component('Footer', Footer)
 
+Vue.prototype.$GAME_CODE_LENGTH = 6
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

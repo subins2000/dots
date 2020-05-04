@@ -425,18 +425,18 @@ export default {
       })
     }
   },
+
   mounted () {
+    if (!localStorage.getItem('gameCode') || localStorage.getItem('gameCode').length !== this.$GAME_CODE_LENGTH) {
+      this.$router.push('/')
+      return
+    }
+
     this.game = this.$refs.game
     this.svg = d3.select(this.$refs.game)
     this.makeGameBoard()
 
     this.gameCode = localStorage.getItem('gameCode')
-
-    if (this.gameCode === '0') {
-      this.gameCode = Math.random().toString(36).substr(2, 6)
-      localStorage.setItem('initiator', true)
-      localStorage.setItem('gameCode', this.gameCode)
-    }
 
     if (localStorage.getItem('initiator')) {
       this.myTurn = true
