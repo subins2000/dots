@@ -3,6 +3,7 @@
     <transition name='slide'>
       <router-view/>
     </transition>
+    <Footer></Footer>
   </div>
 </template>
 

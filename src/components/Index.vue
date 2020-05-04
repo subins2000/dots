@@ -14,23 +14,28 @@
 
     <form class='content' @submit='joinGame'>
       <div class='field'>
-        <input type='text' class='input is-primary is-focused' name='gameCode' v-model='gameCode' placeholder='Paste the Game Code here and Press Enter' @keyup.enter='join' />
-      </div>
-      <div class='field'>
-        <button class="button is-link is-info">Join Game</button>
+        <input type='text' class='input is-primary is-focused' id='gameCode' name='gameCode' v-model='gameCode' autocomplete='off' placeholder='Paste the Game Code here' /> <button class="button is-link is-info">Join Game</button>
       </div>
     </form>
+
+    <Footer/>
   </div>
 </template>
 
 <script>
+import Footer from './Footer.vue'
+
 export default {
   name: 'Index',
+
+  components: { Footer },
+
   data () {
     return {
       gameCode: ''
     }
   },
+
   methods:{
     newGame () {
       this.$router.push('register')
@@ -54,11 +59,10 @@ export default {
 
 <style scoped>
 .container {
-  padding-top: 10vh;
+  padding-top: 5vh;
 }
-button {
-  margin-top: 4px;
-  margin: 0 auto;
-  display: inline-block;
+
+#gameCode {
+  width: 50%;
 }
 </style>
