@@ -233,6 +233,12 @@ export default {
           } else {
             this.myScore++
           }
+
+          var cells = this.game.getElementsByTagName('cell')
+          if (cells.length === cells.getElementsByTagName('active').length) {
+            // All cells completed
+            this.gameFinished = true
+          }
         }
       }
     },
