@@ -1,5 +1,5 @@
 <template>
-  <div class='container has-text-centered'>    
+  <div class='container has-text-centered'>  
     <div class='content'>
       <button class='button is-medium is-primary is-center' @click='newGame'>Start New Game</button>
     </div>
@@ -27,7 +27,7 @@ export default {
     }
   },
 
-  methods:{
+  methods: {
     newGame () {
       this.$router.push('register')
       localStorage.setItem('gameCode', 0) // 0 indicates new game
@@ -40,7 +40,7 @@ export default {
         this.$buefy.toast.open('Please enter valid Game Code')
         this.$router.push('')
       } else {
-        localStorage.setItem('gameCode',this.gameCode)
+        localStorage.setItem('gameCode', this.gameCode)
         this.$router.push('register')
       }
     }

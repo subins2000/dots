@@ -1,8 +1,9 @@
 {
   "name": "vett",
   "version": "1.0.0",
-  "description": "Poojyam Vett",
-  "author": "",
+  "description": "Online multiplayer dots-and-boxes game",
+  "license": "AGPL-3.0",
+  "author": "subins2000",
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
@@ -13,7 +14,6 @@
   "dependencies": {
     "buefy": "^0.8.17",
     "d3": "^5.16.0",
-    "google-fonts-webpack-plugin": "^0.4.4",
     "p2pt": "^1.1.2",
     "vue": "^2.5.2",
     "vue-clipboard2": "^0.3.1",

@@ -1,3 +1,23 @@
+<!--
+Vett, online multiplayer Dots-and-Boxes game
+https://subinsb.com/vett
+Copyright (C) 2020 Subin Siby
+Copyright (C) 2020 Athul Cyriac Ajay
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+-->
+
 <template>
   <div>
     <div id='header'>
@@ -158,7 +178,7 @@ export default {
             .attr('transform', () => {
               return 'translate(' + cellWidth * j + ', 0)'
             })
-          
+
           // Add box
           cell.append('rect')
             .attr('class', 'cell')
@@ -167,7 +187,7 @@ export default {
             .attr('x', cellMargin - 3)
             .attr('y', cellMargin - 3)
             .attr('id', i + '-' + j)
-          
+
           // Add lines
           cell.append('line')
             .attr('class', 'line vline')
@@ -178,7 +198,7 @@ export default {
             .attr('stroke-width', cellMargin)
             .attr('stroke-linecap', 'round')
             .attr('id', i + '-' + j)
-          
+
           cell.append('line')
             .attr('class', 'line hline')
             .attr('x1', cellMargin)
@@ -188,7 +208,7 @@ export default {
             .attr('stroke-width', cellMargin)
             .attr('stroke-linecap', 'round')
             .attr('id', i + '-' + j)
-                 
+
           // Add horizontal line below last row elems
           if (i == gridSize - 1) {
             cell.append('line')
@@ -249,7 +269,7 @@ export default {
       if (!this.myTurn || elem.classList.contains('active')) {
         return false
       }
-      
+
       // It's a line
       this.activateLine(elem)
 
@@ -306,11 +326,11 @@ export default {
       // If activeLine is vertical, then consider boxes left & right of the line
       // If activeLine is horizontal, then consider boxes top & down of the line
       var consideringBoxes = []
-      
+
       var [row, col] = activeLine.id.split('-')
       row = parseInt(row)
       col = parseInt(col)
-      
+
       // If horizontal line is chosen
       if (activeLine.classList.contains('hline')) {
         if (row > 0) {
@@ -320,7 +340,7 @@ export default {
           lines.push(
             this.game.querySelector('.hline[id="' + (row - 1) + '-' + col + '"]')
           )
-          
+
           if (col + 1 <= gridSize) {
             lines.push(
               this.game.querySelector('.vline[id="' + ((row - 1) + '-' + (col + 1)) + '"]')
@@ -357,7 +377,7 @@ export default {
           lines.push(
             this.game.querySelector('.hline[id="' + row + '-' + (col - 1) + '"]')
           )
-          
+
           if (row + 1 <= gridSize) {
             lines.push(
               this.game.querySelector('.hline[id="' + ((row + 1) + '-' + (col - 1)) + '"]')
