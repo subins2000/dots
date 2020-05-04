@@ -9,7 +9,7 @@
 
     <form class='content' @submit='joinGame'>
       <div class='field'>
-        <input type='text' class='input is-primary is-focused' id='gameCode' name='gameCode' v-model='gameCode' autocomplete='off' placeholder='Paste the Game Code here' /> <button class="button is-link is-info">Join Game</button>
+        <input type='text' class='input is-primary' id='gameCode' name='gameCode' v-model='gameCode' autocomplete='off' placeholder='Paste the Game Code here' /> <button class="button is-link is-info">Join Game</button>
       </div>
     </form>
 
@@ -32,13 +32,15 @@ export default {
       this.$router.push('register')
       localStorage.setItem('gameCode', 0) // 0 indicates new game
     },
-    
-    joinGame () {
+
+    joinGame (e) {
+      e.preventDefault()
+
       if (this.gameCode.length !== 6) {
         this.$buefy.toast.open('Please enter valid Game Code')
         this.$router.push('')
       } else {
-        localStorage.setItem('gameCode',this.gname)
+        localStorage.setItem('gameCode',this.gameCode)
         this.$router.push('register')
       }
     }

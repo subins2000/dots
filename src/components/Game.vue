@@ -19,7 +19,7 @@
       </div>
     </div>
     <div class='container' id='game-content'>
-      <div id='game-wrapper'>
+      <div class='content' id='game-wrapper'>
         <svg id='game' ref='game' viewBox='0 0 280 280'></svg>
       </div>
       <div>
@@ -38,16 +38,18 @@
             <p>Tough luck, you lost this game !</p>
           </div>
         </div>
-        <div class='scoreboard content'>
-          <div class='columns is-mobile'>
-            <div class='column' v-bind:class="{ active: myTurn }">{{ myName }}</div>
-            <div class='column' v-bind:class="[!myTurn ? 'active' : '']">{{ friendName }}</div>
-          </div>
-          <div class='columns is-mobile'>
-            <div class='column'>{{ myScore }}</div>
-            <div class='column'>{{ opponentScore }}</div>
-          </div>
-        </div><br/>
+        <table class='table scoreboard content'>
+          <tbody>
+            <tr v-bind:class='{ active: myTurn }'>
+              <td>{{ myName }}</td>
+              <td>{{ myScore }}</td>
+            </tr>
+            <tr v-bind:class='[!myTurn ? "active" : ""]'>
+              <td>{{ friendName }}</td>
+              <td>{{ opponentScore }}</td>
+            </tr>
+          </tbody>
+        </table>
         <div class='content' v-if='!gameFinished'>
           <span v-if='myTurn'>Your turn</span>
           <span v-else>Waiting for opponent's move</span>
@@ -221,6 +223,8 @@ export default {
     },
 
     onLineClick (e) {
+      var elem = e.target
+
       if (!this.myTurn || elem.classList.contains('active')) {
         return false
       }
@@ -388,7 +392,7 @@ export default {
     this.gameCode = localStorage.getItem('gameCode')
 
     if (this.gameCode === '0') {
-      this.gameCode = Math.random().toString(36).substring(6)
+      this.gameCode = Math.random().toString(36).substr(2, 6)
       localStorage.setItem('initiator', true)
       localStorage.setItem('gameCode', this.gameCode)
     }
@@ -417,7 +421,7 @@ export default {
 #game-wrapper {
   height: 60vh;
   width: 60vh;
-  margin: 20px auto;
+  margin: 20px auto 0;
 }
 
 svg {
@@ -455,20 +459,10 @@ svg text::selection {
 }
 
 .scoreboard {
-  display: table;
   margin: 0 auto;
 }
 
-.scoreboard .column {
-  border-radius: 20px;
-  padding: 0.5em;
-  background: #EEE;
-  border: 1px dashed #000;
-  text-align: center;
-  min-width: 100px;
-}
-
-.scoreboard .column.active {
+.scoreboard tr.active {
   background: #00d1b2;
   color: #fff;
 }

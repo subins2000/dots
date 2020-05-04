@@ -17,16 +17,16 @@ export default {
   name: 'Register',
   data () {
     return {
-      pname: ''
+      playerName: ''
     }
   },
   methods: {
     success () {
       this.$buefy.toast.open({
-        message: 'Hi ' + this.pname,
+        message: 'Hi ' + this.playerName,
         type: 'is-success'
       })
-      localStorage.setItem('name', this.pname)
+      localStorage.setItem('name', this.playerName)
 
       this.$router.push('game')
     }
