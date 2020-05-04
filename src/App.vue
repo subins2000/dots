@@ -1,15 +1,21 @@
 <template>
   <div id="app">
+    <GameTitle v-if='displayTitle' />
     <transition name='slide'>
       <router-view/>
     </transition>
-    <Footer></Footer>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
+
+  computed: {
+    displayTitle () {
+      return this.$route.name === 'Index' || this.$route.name === 'Register'
+    }
+  }
 }
 </script>
 
