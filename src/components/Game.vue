@@ -221,24 +221,20 @@ export default {
     },
 
     onLineClick (e) {
-      var elem = e.target
-
-      if (elem.classList.contains('line')) {
-        if (!this.myTurn || elem.classList.contains('active')) {
-          return false
-        }
-        
-        // It's a line
-        this.activateLine(elem)
-
-        this.p2pt.send(this.friend, JSON.stringify({
-          type: 'move',
-          line: elem.classList.contains('hline') ? 'h' : 'v',
-          move: elem.id
-        }))
-
-        this.myTurn = false
+      if (!this.myTurn || elem.classList.contains('active')) {
+        return false
       }
+      
+      // It's a line
+      this.activateLine(elem)
+
+      this.p2pt.send(this.friend, JSON.stringify({
+        type: 'move',
+        line: elem.classList.contains('hline') ? 'h' : 'v',
+        move: elem.id
+      }))
+
+      this.myTurn = false
     },
 
     activateLine (line, friend = false) {
@@ -376,11 +372,11 @@ export default {
     },
 
     copyGameCode() {
-       this.$buefy.toast.open({
-          duration: 2000,
-          message: `Game Code Copied !!!`,
-          position: 'is-top',
-          type: 'is-primary'
+      this.$buefy.toast.open({
+        duration: 2000,
+        message: `Game Code Copied !!!`,
+        position: 'is-top',
+        type: 'is-primary'
       })
     }
   },
@@ -390,8 +386,9 @@ export default {
     this.makeGameBoard()
 
     this.gameCode = localStorage.getItem('gameCode')
+
     if (this.gameCode === '0') {
-      this.gameCode = Math.random().toString(36).substring(7)
+      this.gameCode = Math.random().toString(36).substring(6)
       localStorage.setItem('initiator', true)
       localStorage.setItem('gameCode', this.gameCode)
     }
@@ -421,6 +418,16 @@ export default {
   height: 60vh;
   width: 60vh;
   margin: 20px auto;
+}
+
+svg {
+  -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+svg text::selection {
+    background: none;
 }
 
 #game .cell {
