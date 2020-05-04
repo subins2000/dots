@@ -2,17 +2,20 @@
   <div>
     <div id='header'>
       <div class='container'>
-        <div class='level'>
+        <nav class='level'>
           <div class='level-left'>
-            <span class='level-item'>{{ gameName }} : {{ status }}</span>
             <span class='level-item'>
-              <b-button size="is-small" type="is-text" outlined @click="clickMe" v-clipboard="gameName">Copy Game Code</b-button>
+              <span class='has-text-weight-bold	'></b>{{ gameCode }}</span>
+              <span class='level-item'>
+                <b-button size="is-small" type="is-text" outlined @click="copyGameCode" v-clipboard="gameCode">Copy Game Code</b-button>
+              </span>
+              <span class='level-item has-text-centered'>{{ status }}</span>
             </span>
           </div>
           <div class='level-right' style='text-align: right;'>
             <span class='level-item'>Playing with {{ friendName }}</span>
           </div>
-        </div>
+        </nav>
       </div>
     </div>
     <div class='container' id='game-content'>
@@ -85,22 +88,14 @@ export default {
       myTurn: false,
       myScore: 0,
       opponentScore: 0,
-      gameName: 'ckO2',
+      gameCode: 'ckO2',
       gameFinished: false,
       gameStatus: ''
     }
   },
   methods: {
-    clickMe() {
-       this.$buefy.toast.open({
-          duration: 2000,
-          message: `Game Code Copied !!!`,
-          position: 'is-top',
-          type: 'is-primary'
-      })
-    },
     connect () {
-      this.p2pt = new P2PT(announceURLs, 'vett' + this.gameName)
+      this.p2pt = new P2PT(announceURLs, 'vett' + this.gameCode)
 
       const $this = this
 
@@ -136,6 +131,7 @@ export default {
 
       this.p2pt.start()
     },
+
     makeGameBoard () {
       this.svg.attr('width', '100%')
       this.svg.attr('height', '100%')
@@ -220,10 +216,11 @@ export default {
       // Add events
       const $this = this
       this.game.querySelectorAll('.line').forEach((elem) => {
-        elem.addEventListener('click', $this.onClick)
+        elem.addEventListener('click', $this.onLineClick)
       })
     },
-    onClick (e) {
+
+    onLineClick (e) {
       var elem = e.target
 
       if (elem.classList.contains('line')) {
@@ -243,6 +240,7 @@ export default {
         this.myTurn = false
       }
     },
+
     activateLine (line, friend = false) {
       line.classList.add('active')
       line.classList.add(friend ? 'friend' : 'me')
@@ -278,6 +276,7 @@ export default {
         }
       }
     },
+
     boxComplete (activeLine) {
       // Will have the lines to check if active to know which boxes got filled
       var lines = []
@@ -374,6 +373,15 @@ export default {
       }
 
       return consideringBoxes
+    },
+
+    copyGameCode() {
+       this.$buefy.toast.open({
+          duration: 2000,
+          message: `Game Code Copied !!!`,
+          position: 'is-top',
+          type: 'is-primary'
+      })
     }
   },
   mounted () {
@@ -381,11 +389,11 @@ export default {
     this.svg = d3.select(this.$refs.game)
     this.makeGameBoard()
 
-    this.gameName = localStorage.getItem('gameName')
-    if (this.gameName === '0') {
-      this.gameName = Math.random().toString(36).substring(7)
+    this.gameCode = localStorage.getItem('gameCode')
+    if (this.gameCode === '0') {
+      this.gameCode = Math.random().toString(36).substring(7)
       localStorage.setItem('initiator', true)
-      localStorage.setItem('gameName', this.gameName)
+      localStorage.setItem('gameCode', this.gameCode)
     }
 
     if (localStorage.getItem('initiator')) {

@@ -6,7 +6,7 @@
    <strong class="is-primary has-text-centered">OR</strong><br/>
     </div><br/>
    <div class="has-text-centered">
-      <button class="button is-medium is-primary is-center" @click="nwgame">START New Game</button>
+      <button class="button is-medium is-primary is-center" @click="newgame">START New Game</button>
     </div>
 </div>
 </template>
@@ -20,9 +20,9 @@ export default {
     }
   },
   methods:{
-    nwgame () {
+    newgame () {
       this.$router.push('register')
-      localStorage.setItem('gameName',0)
+      localStorage.setItem('gameCode',0)
     },
     join(){
       if (this.gname===''){
@@ -30,7 +30,7 @@ export default {
         this.$router.push('')
       }
       else{
-        localStorage.setItem('gameName',this.gname)
+        localStorage.setItem('gameCode',this.gname)
         this.$router.push('register')
       }
     }
