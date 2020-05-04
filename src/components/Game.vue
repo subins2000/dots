@@ -2,22 +2,37 @@
   <div>
     <div id='header'>
       <div class='container'>
-        <div class='columns is-mobile'>
-          <div class='column is-half'>
-            {{ gameName }} : {{ status }}
+        <div class='level'>
+          <div class='level-left'>
+            <span class='level-item'>{{ gameName }} : {{ status }}</span>
           </div>
-          <div class='column' style='text-align: right;'>
-            <span>Playing with {{ friendName }}</span>
+          <div class='level-right' style='text-align: right;'>
+            <span class='level-item'>Playing with {{ friendName }}</span>
           </div>
         </div>
       </div>
     </div>
-    <div class='container'>
+    <div class='container' id='game-content'>
       <div id='game-wrapper'>
         <svg id='game' ref='game' viewBox='0 0 280 280'></svg>
       </div>
       <div>
-        <div class='scoreboard'>
+        <div id='game-end' class='content' v-if='gameFinished'>
+          <h1 class='is-size-1'>Game Over</h1>
+          <div v-if='gameStatus === "draw"'>
+            <h3 class='is-size-3'>Draw !</h3>
+            <p>Y'all played it to a draw !</p>
+          </div>
+          <div v-else-if='gameStatus === "win"'>
+            <h3 class='is-size-3'>You win !</h3>
+            <p>You won the game !</p>
+          </div>
+          <div v-else>
+            <h3 class='is-size-3'>You lost !</h3>
+            <p>Tough luck, you lost this game !</p>
+          </div>
+        </div>
+        <div class='scoreboard content'>
           <div class='columns is-mobile'>
             <div class='column' v-bind:class="{ active: myTurn }">{{ myName }}</div>
             <div class='column' v-bind:class="[!myTurn ? 'active' : '']">{{ friendName }}</div>
@@ -27,10 +42,10 @@
             <div class='column'>{{ opponentScore }}</div>
           </div>
         </div><br/>
-        <center>
+        <div class='content' v-if='!gameFinished'>
           <span v-if='myTurn'>Your turn</span>
           <span v-else>Waiting for opponent's move</span>
-        </center>
+        </div>
       </div>
     </div>
   </div>
@@ -61,13 +76,15 @@ export default {
   p2pt: null,
   data () {
     return {
+      status: 'Waiting for players...',
       myName: localStorage.getItem('name'),
       friendName: '',
-      gameName: 'ckO2',
-      status: 'Connecting...',
-      myScore: 0,
       myTurn: false,
-      opponentScore: 0
+      myScore: 0,
+      opponentScore: 0,
+      gameName: 'ckO2',
+      gameFinished: false,
+      gameStatus: ''
     }
   },
   methods: {
@@ -238,6 +255,14 @@ export default {
           if (cells.length === cells.getElementsByTagName('active').length) {
             // All cells completed
             this.gameFinished = true
+
+            if (this.myScore === this.opponentScore) {
+              this.gameStatus = 'draw'
+            } else if (this.myScore > this.opponentScore) {
+              this.gameStatus = 'win'
+            } else {
+              this.gameStatus = 'lose'
+            }
           }
         }
       }
@@ -367,6 +392,10 @@ export default {
   padding: 1em;
   background-color: #00d1b2;
   color: #fff;
+}
+
+#game-content {
+  text-align: center;
 }
 
 #game-wrapper {
