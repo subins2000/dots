@@ -92,7 +92,7 @@ export default {
       opponentScore: 0,
       gameCode: 'ckO2',
       gameFinished: false,
-      gameStatus: ''
+      gameStatus: 'playerwait'
     }
   },
   methods: {
@@ -109,10 +109,12 @@ export default {
           name: this.myName
         }))
 
+        $this.gameStatus = 'joined'
         $this.status = 'Connected to peer'
       })
 
       this.p2pt.on('peerclose', (peer) => {
+        $this.gameStatus = 'close'
         $this.status = 'Connection lost'
       })
 
@@ -223,6 +225,25 @@ export default {
     },
 
     onLineClick (e) {
+      if (this.gameStatus === 'close') {
+        this.$buefy.toast.open({
+          message: 'Connection lost. Retrying...',
+          type: 'is-error'
+        })
+        this.p2pt.requestMorePeers()
+
+        return false
+      }
+
+      if (this.gameStatus === 'playerwait') {
+        this.$buefy.toast.open({
+          message: 'Waiting for players to join...',
+          type: 'is-warning'
+        })
+
+        return false
+      }
+
       var elem = e.target
 
       if (!this.myTurn || elem.classList.contains('active')) {
