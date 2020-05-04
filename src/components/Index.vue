@@ -44,6 +44,11 @@ export default {
         this.$router.push('register')
       }
     }
+  },
+
+  mounted () {
+    localStorage.removeItem('initiator')
+    localStorage.removeItem('gameCode')
   }
 }
 </script>
@@ -51,10 +56,6 @@ export default {
 <!-- Add 'scoped' attribute to limit CSS to this component only -->
 
 <style scoped>
-.container {
-  padding-top: 5vh;
-}
-
 #gameCode {
   width: 50%;
 }

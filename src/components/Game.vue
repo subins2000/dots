@@ -20,14 +20,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <template>
   <div>
-    <div id='header'>
+    <div id='header' class='has-background-primary'>
       <div class='container'>
-        <nav class='level'>
+        <nav class='level is-mobile'>
           <div class='level-left'>
             <span class='level-item'>
-              <span class='has-text-weight-bold	'></b>{{ gameCode }}</span>
+              <span class='has-text-weight-bold'></b>{{ gameCode }}</span>&nbsp;
               <span class='level-item'>
-                <b-button size="is-small" type="is-text" outlined @click="copyGameCode" v-clipboard="gameCode">Copy Game Code</b-button>
+                <b-button size='is-small' type='is-success' outlined @click='copyGameCode' v-clipboard='gameCode'>Copy</b-button>
               </span>
               <span class='level-item has-text-centered'>{{ status }}</span>
             </span>
@@ -60,11 +60,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </div>
         <table class='table scoreboard content'>
           <tbody>
-            <tr v-bind:class='{ active: myTurn }'>
+            <tr v-bind:class='{ "has-background-primary": myTurn }'>
               <td>{{ myName }}</td>
               <td>{{ myScore }}</td>
             </tr>
-            <tr v-bind:class='[!myTurn ? "active" : ""]'>
+            <tr v-bind:class='[!myTurn ? "has-background-primary" : ""]'>
               <td>{{ friendName }}</td>
               <td>{{ opponentScore }}</td>
             </tr>
@@ -130,7 +130,7 @@ export default {
         }))
 
         $this.gameStatus = 'joined'
-        $this.status = 'Connected to peer'
+        $this.status = ''
       })
 
       this.p2pt.on('peerclose', (peer) => {
@@ -301,8 +301,8 @@ export default {
             this.myScore++
           }
 
-          var cells = this.game.getElementsByTagName('cell')
-          if (cells.length === cells.getElementsByTagName('active').length) {
+          var cells = this.game.getElementsByClassName('cell')
+          if (cells.length === this.game.getElementsByClassName('cell active').length) {
             // All cells completed
             this.gameFinished = true
 
@@ -451,7 +451,6 @@ export default {
 <style>
 #header {
   padding: 1em;
-  background-color: #00d1b2;
   color: #fff;
 }
 
@@ -503,8 +502,7 @@ svg text::selection {
   margin: 0 auto;
 }
 
-.scoreboard tr.active {
-  background: #00d1b2;
+.scoreboard tr.has-background-primary {
   color: #fff;
 }
 </style>
