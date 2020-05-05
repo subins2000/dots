@@ -103,24 +103,94 @@ var gridSize = 6
 var cellWidth = 40
 var cellMargin = 5
 
+var randomColor = {
+  rgbToYIQ ({r, g, b}) {
+    return ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  },
+
+  hexToRgb (hex) {
+    if (!hex || hex === undefined || hex === '') {
+      return undefined;
+    }
+
+    const result =
+          /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : undefined;
+  },
+
+  /**
+   * Get contrast color for text
+   *
+   * https://medium.com/better-programming/generate-contrasting-text-for-your-random-background-color-ac302dc87b4
+   * Copyright David Dal Busco
+   * Licensd under MIT
+   * https://www.npmjs.com/package/@deckdeckgo/color
+   */
+  contrast (colorHex, threshold = 128) {
+    if (colorHex === undefined) {
+      return '#000';
+    }
+
+    const rgb = this.hexToRgb(colorHex);
+
+    if (rgb === undefined) {
+      return '#000';
+    }
+
+    return this.rgbToYIQ(rgb) >= threshold ? '#000' : '#fff';
+  },
+
+  /**
+   * Get a random color and suitable text color for it
+   */
+  get () {
+    var randomColor = '#' + Math.floor(Math.random()*16777215).toString(16)
+    return [randomColor, this.contrast(randomColor)]
+  }
+}
+
 export default {
   name: 'Game',
+  
   friend: null,
   p2pt: null,
+
+  myID: '',
+
   data () {
     return {
       status: 'Waiting for players...',
       myName: localStorage.getItem('name'),
       friendName: '',
+
       myTurn: false,
       myScore: 0,
       opponentScore: 0,
       gameCode: 'ckO2',
       gameFinished: false,
       gameStatus: 'playerwait',
-      audio: ['box', 'mark']
+      audio: ['box', 'mark'],
+
+      players: {},
+      playerTurns: []
     }
   },
+
+  watch: {
+    playerTurns: {
+      deep: true,
+      
+      handler () {
+        this.myTurn = this.playerTurns.indexOf(true) == this.myID
+      }
+    }
+  },
+
   methods: {
     connect () {
       this.p2pt = new P2PT(announceURLs, 'vett' + this.gameCode)
@@ -128,11 +198,14 @@ export default {
       const $this = this
 
       this.p2pt.on('peerconnect', (peer) => {
+        $this.myDiceNumber = parseInt(Math.random().toString().substr(2, 1))
         $this.friend = peer
 
         this.p2pt.send(peer, JSON.stringify({
-          type: 'name',
-          name: this.myName
+          type: 'init',
+          playerID: $this.myID,
+          name: $this.myName,
+          colors: $this.players[$this.myID].colors
         }))
 
         $this.gameStatus = 'joined'
@@ -151,11 +224,21 @@ export default {
           var line = msg.line === 'h' ? 'hline' : 'vline'
           var [row, col] = msg.move.split('-')
 
-          $this.activateLine($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'), true)
+          $this.activateLine($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'), msg.playerID)
 
           $this.myTurn = true
-        } else if (msg.type === 'name') {
+        } else if (msg.type === 'init') {
           $this.friendName = msg.name
+          
+          $this.players[msg.playerID] = {
+            name: msg.name,
+            colors: msg.colors
+          }
+
+          this.$set(this.playerTurns, msg.playerID, false)
+
+          // Set first item in array to true
+          $this.playerTurns[$this.playerTurns.indexOf(false)] = true
         }
       })
 
@@ -302,10 +385,11 @@ export default {
       }
 
       // It's a line
-      this.activateLine(elem)
+      this.activateLine(elem, this.myID)
 
       this.p2pt.send(this.friend, JSON.stringify({
         type: 'move',
+        playerID: this.myID,
         line: elem.classList.contains('hline') ? 'h' : 'v',
         move: elem.id
       }))
@@ -313,11 +397,11 @@ export default {
       this.myTurn = false
     },
 
-    activateLine (line, friend = false) {
+    activateLine (line, playerID) {
       var audioToPlay = 'mark'
 
       line.classList.add('active')
-      line.classList.add(friend ? 'friend' : 'me')
+      line.style.stroke = this.players[playerID].colors[0]
 
       var completedBoxes = this.boxComplete(line)
       var box
@@ -327,13 +411,14 @@ export default {
         
         if (box) {
           box = this.game.querySelector('.cell[id="' + id + '"]')
+          
           box.classList.add('active')
-          box.classList.add(friend ? 'friend' : 'me')
+          box.style.fill = this.players[playerID].colors[0]
 
-          if (friend) {
-            this.opponentScore++
-          } else {
+          if (this.myTurn) {
             this.myScore++
+          } else {
+            this.opponentScore++
           }
 
           audioToPlay = 'box'
@@ -487,6 +572,18 @@ export default {
       this.myTurn = true
     }
 
+    if (!sessionStorage.getItem('myID')) {
+      sessionStorage.setItem('myID', parseInt(Math.random().toString().substr(2, 4)))
+    }
+
+    this.myID = sessionStorage.getItem('myID')
+
+    this.players[this.myID] = {
+      name: this.myName,
+      colors: randomColor.get()
+    }
+    this.$set(this.playerTurns, this.myID, false)
+
     this.connect()
   }
 }
@@ -521,14 +618,7 @@ svg text::selection {
 
 #game .cell {
   fill: #EEE;
-}
-
-#game .cell.active {
-  fill: #ffa7d3;
-}
-
-#game .cell.active.friend {
-  fill: #d978ff;
+  opacity: 0.6;
 }
 
 #game .dot {
@@ -538,14 +628,6 @@ svg text::selection {
 
 #game .line {
   stroke: #BBB;
-}
-
-#game .line.active {
-  stroke: #CF649A;
-}
-
-#game .line.active.friend {
-  stroke: #a519dd;
 }
 
 .scoreboard {
