@@ -4,7 +4,7 @@
       <form @submit='playGame'>
         <div class='content'>
           <p>What is your name ?</p>
-          <input type='text' class='input' id='playerName' name='name' v-model='playerName' placeholder='Type your name here' />
+          <input type='text' class='input' id='playerName' name='name' v-model='playerName' v-focus placeholder='Type your name here' />
         </div>
         <div class='content'>
           <button class='button is-medium is-success is-center'>Play !</button>

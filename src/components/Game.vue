@@ -41,6 +41,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <div class='container' id='game-content'>
       <div class='content' id='game-wrapper'>
         <svg id='game' ref='game' viewBox='0 0 280 280'></svg>
+        <div class='is-hidden'>
+          <audio v-for='a in audio' v-bind:id='"audio-" + a' v-bind:ref='"audio-" + a' async='async'>
+            <source v-bind:src='"static/" + a + ".ogg"' type='audio/ogg'>
+          </audio>
+        </div>
       </div>
       <div>
         <div id='game-end' class='content' v-if='gameFinished'>
@@ -112,7 +117,8 @@ export default {
       opponentScore: 0,
       gameCode: 'ckO2',
       gameFinished: false,
-      gameStatus: 'playerwait'
+      gameStatus: 'playerwait',
+      audio: ['box', 'mark']
     }
   },
   methods: {
@@ -308,13 +314,17 @@ export default {
     },
 
     activateLine (line, friend = false) {
+      var audioToPlay = 'mark'
+
       line.classList.add('active')
       line.classList.add(friend ? 'friend' : 'me')
 
       var completedBoxes = this.boxComplete(line)
       var box
+
       for (var id in completedBoxes) {
         box = completedBoxes[id]
+        
         if (box) {
           box = this.game.querySelector('.cell[id="' + id + '"]')
           box.classList.add('active')
@@ -325,6 +335,8 @@ export default {
           } else {
             this.myScore++
           }
+
+          audioToPlay = 'box'
 
           var cells = this.game.getElementsByClassName('cell')
           if (cells.length === this.game.getElementsByClassName('cell active').length) {
@@ -338,9 +350,13 @@ export default {
             } else {
               this.gameStatus = 'lose'
             }
+
+            audioToPlay = 'end'
           }
         }
       }
+
+      this.playAudio(audioToPlay)
     },
 
     boxComplete (activeLine) {
@@ -448,6 +464,10 @@ export default {
         position: 'is-top',
         type: 'is-primary'
       })
+    },
+
+    playAudio (audioID) {
+      this.$refs['audio-' + audioID][0].play()
     }
   },
 
@@ -463,7 +483,7 @@ export default {
 
     this.gameCode = localStorage.getItem('gameCode')
 
-    if (localStorage.getItem('initiator')) {
+    if (localStorage.getItem('gameCreator')) {
       this.myTurn = true
     }
 

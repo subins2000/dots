@@ -20,6 +20,13 @@ Vue.use(VueClipboard)
 Vue.component('GameTitle', GameTitle)
 Vue.component('Footer', Footer)
 
+// Focus input. Use `v-focus` attribute
+Vue.directive('focus', {
+  inserted: function (el) {
+    el.focus()
+  }
+})
+
 Vue.prototype.$GAME_CODE_LENGTH = 6
 
 /* eslint-disable no-new */
