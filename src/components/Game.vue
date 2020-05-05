@@ -415,6 +415,10 @@ export default {
           box.classList.add('active')
           box.style.fill = this.players[playerID].colors[0]
 
+          box = d3.select(box)
+          box.append('text')
+            .text(this.players[playerID].name[0])
+
           if (this.myTurn) {
             this.myScore++
           } else {
