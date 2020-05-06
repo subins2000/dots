@@ -25,7 +25,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <nav class='level is-mobile'>
           <div class='level-left'>
             <span class='level-item'>
-              <router-link to='/' class='button'>Vett</router-link>
+              <router-link to='/' class='button'>Vett !</router-link>
+              &nbsp;&nbsp;
+              <span class='has-text-weight-bold' title='Game Code'></b>{{ gameCode }}</span>
             </span>
           </div>
           <span class='level-item has-text-centered'>{{ status }}</span>
