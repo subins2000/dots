@@ -107,10 +107,20 @@ var cellWidth = 40
 var cellMargin = 5
 
 /**
-  * A historical list of all players (IDs) who have joined
-  * Used for restoring gamestate when new player/connection lost player joins
-  */
+ * A historical list of all players (IDs) who have joined
+ * Used for restoring gamestate when new player/connection lost player joins
+ */
 var joinedPlayers = []
+
+/**
+ * Storage for restoring gamestate if needed
+ */
+var restoreGameData = false
+
+/**
+ * History of all line markings
+ */
+var gameHistory = []
 
 export default {
   name: 'Game',
@@ -199,7 +209,9 @@ export default {
           colors: $this.players[$this.myID].colors
         })).then(([peer, msg]) => {
           // The reply, if there is, would be the game state
-          $this.restoreGameState(JSON.parse(msg))
+          var msg = JSON.parse(msg)
+          restoreGameData = msg
+          $this.timeToRestoreGame()
         })
 
         $this.gameStatus = 'joined'
@@ -211,6 +223,7 @@ export default {
         for (var id in $this.players) {
           player = $this.players[id]
           if (player.conn.id === peer.id) {
+            delete $this.playerTurns[id]
             delete $this.players[id]
             break
           }
@@ -252,8 +265,11 @@ export default {
             }
 
             // Lucky you ! You get to restore their game
-            if (whoWillSend === $this.myID) {
-              peer.respond(JSON.stringify($this.getGameState()))
+            if (whoWillSend == $this.myID) {
+              peer.respond(JSON.stringify({
+                playerCount: Object.keys(this.players).length,
+                gameHistory: gameHistory
+              }))
             }
           } else {
             joinedPlayers.push(msg.playerID)
@@ -264,6 +280,8 @@ export default {
             // Set first item in array to true
             $this.$set(this.playerTurns, $this.playerTurns.indexOf(false), true)
           }
+
+          $this.timeToRestoreGame()
         } else if (msg.type === 'playagain') {
           $this.$buefy.toast.open({
             message: 'One of your opponents want to play again. Click the Play Again button at the bottom if you want to.',
@@ -433,15 +451,16 @@ export default {
       })
 
       this.activateLine(elem, this.myID)
-      console.log(this.getGameState())
+      console.log(gameHistory)
     },
 
     activateLine (line, playerID) {
       var audioToPlay = 'mark'
 
       line.classList.add('active')
-      line.playerID = playerID
       line.style.stroke = this.players[playerID].colors[0]
+
+      gameHistory.push([playerID, line.classList.contains('hline') ? 'h' : 'v', line.id])
 
       var completedBoxes = this.boxComplete(line)
       var box
@@ -453,7 +472,6 @@ export default {
           box = this.game.querySelector('.cell[id="' + id + '"]')
           
           box.classList.add('active')
-          box.playerID = playerID
           box.style.fill = this.players[playerID].colors[0]
 
           // Select parent <g> of box
@@ -667,39 +685,31 @@ export default {
       }
     },
 
-    getGameState () {
-      var game = {}
+    restoreGameState (history) {
+      var h
+      for (var hi in history) {
+        h = history[hi] // [playerID, lineType, lineID]
 
-      for (var playerID in this.playerTurns) {
-        game[playerID] = {
-          cells: [],
-          lines: {
-            h: [],
-            v: []
-          }
-        }
+        this.activateLine(this.game.querySelector('.' + h[1] + 'line[id="' + h[2] + '"]'), h[0])
       }
-
-      Array.from(this.game.getElementsByClassName('cell active')).forEach(cell => {
-        game[cell.playerID].cells.push(cell.id)
-      })
-      Array.from(this.game.getElementsByClassName('line active')).forEach(line => {
-        game[line.playerID].lines[line.classList.contains('hline') ? 'h' : 'v'].push(line.id)
-      })
-
-      return game
     },
 
-    restoreGameState (state) {
-      var lineID
-      for (var playerID in state) {
-        for (var lt in state[playerID].lines) { // lt = line type
-          for (var li in state[playerID].lines[lt]) {
-            lineID = state[playerID].lines[lt][li]
-            this.activateLine(this.game.querySelector('.' + lt + 'line[id="' + lineID + '"]'), playerID)
-          }
-        }
+    /**
+     * Will restore game if all players info is obtained
+     */
+    timeToRestoreGame () {
+      console.log(restoreGameData)
+      if (!restoreGameData) {
+        return false
       }
+      
+      // Only restore if all online, active players info is obtained. Otherwise this.players object will be incomplete and activateLine() will fail
+      if (restoreGameData.playerCount > Object.keys(this.players).length) {
+        return false
+      }
+
+      this.restoreGameState(restoreGameData.gameHistory)
+      restoreGameData = false
     }
   },
 
