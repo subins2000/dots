@@ -32,7 +32,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
           </div>
           <span class='level-item has-text-centered'>{{ status }}</span>
           <div class='level-right' style='text-align: right;'>
-            <span class='level-item' v-if='friendName'>Playing with {{ friendName }}</span>
+            <span class='level-item' v-if='gameStatus !== "playerwait"'>{{ Object.keys(players).length }}&nbsp;Players</span>
           </div>
         </nav>
       </div>
@@ -106,10 +106,15 @@ var gridSize = 6
 var cellWidth = 40
 var cellMargin = 5
 
+/**
+  * A historical list of all players (IDs) who have joined
+  * Used for restoring gamestate when new player/connection lost player joins
+  */
+var joinedPlayers = []
+
 export default {
   name: 'Game',
-  
-  friend: null,
+
   p2pt: null,
 
   myID: '',
@@ -118,17 +123,19 @@ export default {
     return {
       status: 'Waiting for player...',
       myName: localStorage.getItem('name'),
-      friendName: '',
 
       myTurn: false,
-      myScore: 0,
-      opponentScore: 0,
       gameCode: 'ckO2',
       gameFinished: false,
       gameStatus: 'playerwait',
       audio: ['box', 'mark', 'end'],
 
       players: {},
+
+      /**
+       * Will have playerID => false
+       * The player whose turn is now will only have true
+       */
       playerTurns: [],
 
       // For some weird reason, score update isn't immediate after property change. Tried :key and .$set and yet it didn't work. So had to go with this terrible hack
@@ -185,20 +192,29 @@ export default {
           return
         }
 
-        $this.friend = peer
-
         this.p2pt.send(peer, JSON.stringify({
-          type: 'init',
+          type: 'join',
           playerID: $this.myID,
           name: $this.myName,
           colors: $this.players[$this.myID].colors
-        }))
+        })).then(([peer, msg]) => {
+          // The reply, if there is, would be the game state
+          $this.restoreGameState(JSON.parse(msg))
+        })
 
         $this.gameStatus = 'joined'
         $this.status = ''
       })
 
       this.p2pt.on('peerclose', (peer) => {
+        var player
+        for (var id in $this.players) {
+          player = $this.players[id]
+          if (player.conn.id === peer.id) {
+            delete $this.players[id]
+            break
+          }
+        }
         $this.gameStatus = 'close'
         $this.status = 'Connection lost'
       })
@@ -211,10 +227,9 @@ export default {
           var [row, col] = msg.move.split('-')
 
           $this.activateLine($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'), msg.playerID)
-        } else if (msg.type === 'init') {
-          $this.friendName = msg.name
-          
+        } else if (msg.type === 'join') {
           $this.players[msg.playerID] = {
+            conn: peer,
             name: msg.name,
             colors: msg.colors,
             score: 0
@@ -222,11 +237,36 @@ export default {
 
           $this.playerTurns[msg.playerID] = false
 
-          // Set first item in array to true
-          $this.$set(this.playerTurns, $this.playerTurns.indexOf(false), true)
+          // This player had already been here.
+          // Probably rejoining because connection lost.
+          // Paavam
+          if (joinedPlayers.indexOf(msg.playerID) !== -1) {
+            // Everyone shouldn't send them (singular) gamestate.
+            var whoWillSend
+            // Find first player in queue
+            for (var pid in $this.playerTurns) {
+              if (pid !== msg.playerID) {
+                whoWillSend = pid
+                break
+              }
+            }
+
+            // Lucky you ! You get to restore their game
+            if (whoWillSend === $this.myID) {
+              peer.respond(JSON.stringify($this.getGameState()))
+            }
+          } else {
+            joinedPlayers.push(msg.playerID)
+          }
+
+          // There won't be a 'true' value if it's a new game
+          if ($this.playerTurns.indexOf(true) === -1) {
+            // Set first item in array to true
+            $this.$set(this.playerTurns, $this.playerTurns.indexOf(false), true)
+          }
         } else if (msg.type === 'playagain') {
-          this.$buefy.toast.open({
-            message: 'Your opponent wants to play again. Click the Play Again button at the bottom if you want to.',
+          $this.$buefy.toast.open({
+            message: 'One of your opponents want to play again. Click the Play Again button at the bottom if you want to.',
             position: 'is-top',
             type: 'is-warning',
             duration: 6000
@@ -385,20 +425,22 @@ export default {
         return false
       }
 
-      this.p2pt.send(this.friend, JSON.stringify({
+      this.sendToAll({
         type: 'move',
         playerID: this.myID,
         line: elem.classList.contains('hline') ? 'h' : 'v',
         move: elem.id
-      }))
+      })
 
       this.activateLine(elem, this.myID)
+      console.log(this.getGameState())
     },
 
     activateLine (line, playerID) {
       var audioToPlay = 'mark'
 
       line.classList.add('active')
+      line.playerID = playerID
       line.style.stroke = this.players[playerID].colors[0]
 
       var completedBoxes = this.boxComplete(line)
@@ -411,6 +453,7 @@ export default {
           box = this.game.querySelector('.cell[id="' + id + '"]')
           
           box.classList.add('active')
+          box.playerID = playerID
           box.style.fill = this.players[playerID].colors[0]
 
           // Select parent <g> of box
@@ -602,14 +645,61 @@ export default {
       // Reset data
       Object.assign(this.$data, this.$options.data.apply(this))
 
-      this.p2pt.send(this.friend, JSON.stringify({
+      this.sendToAll({
         'type': 'playagain'
-      }))
+      })
 
       this.p2pt.destroy()
       this.svg.selectAll('*').remove()
 
       this.init()
+    },
+
+    sendToAll (json) {
+      var player;
+      for (var id in this.players) {
+        player = this.players[id]
+
+        // Me (the player) won't have the conn
+        if (player.conn) {
+          this.p2pt.send(player.conn, JSON.stringify(json))
+        }
+      }
+    },
+
+    getGameState () {
+      var game = {}
+
+      for (var playerID in this.playerTurns) {
+        game[playerID] = {
+          cells: [],
+          lines: {
+            h: [],
+            v: []
+          }
+        }
+      }
+
+      Array.from(this.game.getElementsByClassName('cell active')).forEach(cell => {
+        game[cell.playerID].cells.push(cell.id)
+      })
+      Array.from(this.game.getElementsByClassName('line active')).forEach(line => {
+        game[line.playerID].lines[line.classList.contains('hline') ? 'h' : 'v'].push(line.id)
+      })
+
+      return game
+    },
+
+    restoreGameState (state) {
+      var lineID
+      for (var playerID in state) {
+        for (var lt in state[playerID].lines) { // lt = line type
+          for (var li in state[playerID].lines[lt]) {
+            lineID = state[playerID].lines[lt][li]
+            this.activateLine(this.game.querySelector('.' + lt + 'line[id="' + lineID + '"]'), playerID)
+          }
+        }
+      }
     }
   },
 
