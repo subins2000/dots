@@ -225,8 +225,6 @@ export default {
           var [row, col] = msg.move.split('-')
 
           $this.activateLine($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'), msg.playerID)
-
-          $this.myTurn = true
         } else if (msg.type === 'init') {
           $this.friendName = msg.name
           
@@ -384,9 +382,6 @@ export default {
         return false
       }
 
-      // It's a line
-      this.activateLine(elem, this.myID)
-
       this.p2pt.send(this.friend, JSON.stringify({
         type: 'move',
         playerID: this.myID,
@@ -394,7 +389,7 @@ export default {
         move: elem.id
       }))
 
-      this.myTurn = false
+      this.activateLine(elem, this.myID)
     },
 
     activateLine (line, playerID) {
@@ -449,6 +444,25 @@ export default {
             audioToPlay = 'end'
           }
         }
+      }
+
+      if (audioToPlay === 'box') {
+        // A box was made because of this line. So, one more turn
+        this.playerTurns[playerID] = true
+      } else {
+        /**
+          * Get the playerID of the next player after the current player in array
+          * indexOf() second param is startIndex
+          */
+        if (playerID == this.playerTurns.length - 1) {
+          var nextPlayerID = this.playerTurns.indexOf(false, 0) // Get first item in array
+        } else {
+          var nextPlayerID = this.playerTurns.indexOf(false, playerID)
+        }
+        
+        // Vue watch only gets triggered if changed with $set : https://vuejs.org/v2/guide/reactivity.html#For-Arrays
+        this.playerTurns[playerID] = false
+        this.$set(this.playerTurns, nextPlayerID, true)
       }
 
       this.playAudio(audioToPlay)
