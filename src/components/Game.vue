@@ -49,7 +49,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
       <div>
         <table class='table scoreboard content'>
           <tbody>
-            <tr v-for='p in players' v-bind:style='"border: 3px dashed " + p.colors[0]'>
+            <tr v-for='p in players' v-bind:style='"border: 3px dashed " + p.colors[0]' v-if='reRenderScoreboard'>
               <td>{{ p.name }}</td>
               <td>{{ p.score }}</td>
             </tr>
@@ -129,7 +129,10 @@ export default {
       audio: ['box', 'mark', 'end'],
 
       players: {},
-      playerTurns: []
+      playerTurns: [],
+
+      // For some weird reason, score update isn't immediate after property change. Tried :key and .$set and yet it didn't work. So had to go with this terrible hack
+      reRenderScoreboard: true
     }
   },
 
@@ -225,7 +228,8 @@ export default {
           this.$buefy.toast.open({
             message: 'Your opponent wants to play again. Click the Play Again button at the bottom if you want to.',
             position: 'is-top',
-            type: 'is-warning'
+            type: 'is-warning',
+            duration: 6000
           })
         }
       })
@@ -419,7 +423,10 @@ export default {
             .attr('text-anchor', 'middle')
             .text(this.players[playerID].name[0])
 
-          this.players[playerID].score++
+          this.$set(this.players[playerID], 'score', this.players[playerID].score + 1)
+
+          this.reRenderScoreboard = false
+          this.reRenderScoreboard = true
 
           audioToPlay = 'box'
 

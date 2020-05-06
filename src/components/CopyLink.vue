@@ -8,7 +8,7 @@
           <span class='button is-primary is-medium' @click='copyGameLink' v-clipboard='gameLink'>Copy</span>
         </div>
       </div>
-    </div>
+    </div><br/><br/>
   </div>
 </template>
 
@@ -27,7 +27,7 @@ export default {
       this.$buefy.toast.open({
         duration: 2000,
         message: `Invite Link Copied !`,
-        position: 'is-bottom',
+        position: 'is-top',
         type: 'is-primary'
       })
     },
