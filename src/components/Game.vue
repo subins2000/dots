@@ -33,7 +33,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             </span>
           </div>
           <div class='level-right' style='text-align: right;'>
-            <span class='level-item'>Playing with {{ friendName }}</span>
+            <span class='level-item' v-if='friendName'>Playing with {{ friendName }}</span>
           </div>
         </nav>
       </div>

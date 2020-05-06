@@ -27,7 +27,8 @@ Vue.directive('focus', {
   }
 })
 
-Vue.prototype.$GAME_CODE_LENGTH = 6
+Vue.prototype.$GAME_CODE_LENGTH = 4
+Vue.prototype.$GAME_INVITE_LINK = 'https://vett.space/#/?g='
 
 /* eslint-disable no-new */
 new Vue({

@@ -8,6 +8,17 @@
         </div>
         <div class='content'>
           <button class='button is-medium is-success is-center'>Play !</button>
+        </div><br/><br/>
+        <div class='content'>
+          Share this link with your friend to join the game :
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="form-control wizard-form-control d-flex align-items-center testing-code px-20px mb-10px">
+                <input class='input is-medium is-flat' id='linkInput' @click="$event.target.select()" :value='gameLink' readonly />
+                <span class='button is-primary is-medium' @click='copyGameLink' v-clipboard='gameLink'>Copy</span>
+              </div>
+            </div>
+          </div>
         </div>
       </form>
     </div>
@@ -19,11 +30,21 @@ export default {
   name: 'Register',
   data () {
     return {
-      playerName: localStorage.getItem('name')
+      playerName: localStorage.getItem('name'),
+      gameLink: this.$GAME_INVITE_LINK + localStorage.getItem('gameCode')
     }
   },
 
   methods: {
+    copyGameLink () {
+      this.$buefy.toast.open({
+        duration: 2000,
+        message: `Invite Link Copied !`,
+        position: 'is-bottom',
+        type: 'is-primary'
+      })
+    },
+
     playGame (e) {
       e.preventDefault()
 
@@ -47,7 +68,7 @@ export default {
 </script>
 
 <style scoped>
-#playerName {
+#playerName, #linkInput {
   width: 70%;
 }
 </style>
