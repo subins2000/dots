@@ -124,7 +124,7 @@ export default {
       gameCode: 'ckO2',
       gameFinished: false,
       gameStatus: 'playerwait',
-      audio: ['box', 'mark'],
+      audio: ['box', 'mark', 'end'],
 
       players: {},
       playerTurns: []
