@@ -1,21 +1,16 @@
-# vett
+# Vett
 
-> Poojyam Vett
+[Playe the Game Here!](//vett.space)
+
+When we were kids, we used to play Dots & Boxes game (called As `Poojyam Vett` (പൂജ്യം വെട്ട്) in our local language Malayalam) in school. It's still a popular game in school : https://en.wikipedia.org/wiki/Dots_and_Boxes
+
+This is that game made online. It's an online multiplayer implementation of Dots-and-Boxes !
+
+Built with VueJS, d3.js, [P2PT](//github.com/subins2000/p2pt). Uses WebTorrent trackers for making Peer-to-Peer connections for multiplayer.
 
 ## Build Setup
 
-``` bash
-# install dependencies
-npm install
-
-# serve with hot reload at localhost:8080
-npm run dev
-
-# build for production with minification
-npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
 ```
-
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+yarn install
+yarn run
+```
