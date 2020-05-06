@@ -48,21 +48,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </div>
       </div>
       <div>
-        <div id='game-end' class='content' v-if='gameFinished'>
-          <h1 class='is-size-1'>Game Over</h1>
-          <div v-if='gameStatus === "draw"'>
-            <h3 class='is-size-3'>Draw !</h3>
-            <p>Y'all played it to a draw !</p>
-          </div>
-          <div v-else-if='gameStatus === "win"'>
-            <h3 class='is-size-3'>You win !</h3>
-            <p>You won the game !</p>
-          </div>
-          <div v-else>
-            <h3 class='is-size-3'>You lost !</h3>
-            <p>Tough luck, you lost this game !</p>
-          </div>
-        </div>
         <table class='table scoreboard content'>
           <tbody>
             <tr v-bind:class='{ "has-background-primary": myTurn }'>
@@ -78,6 +63,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <div class='content' v-if='!gameFinished'>
           <span v-if='myTurn'>Your turn</span>
           <span v-else>Waiting for opponent's move</span>
+        </div>
+        <div id='game-end' class='content' v-if='gameFinished'>
+          <h1 class='is-size-1'>Game Over</h1>
+          <div v-if='gameStatus === "draw"'>
+            <h3 class='is-size-3'>Draw !</h3>
+            <p>Y'all played it to a draw ! 😱</p>
+          </div>
+          <div v-else-if='gameStatus === "win"'>
+            <h3 class='is-size-3'>You win !</h3>
+            <p>You won the game ! 🥳🥳</p>
+          </div>
+          <div v-else>
+            <h3 class='is-size-3'>You lost !</h3>
+            <p>Tough luck, you lost this game :(</p>
+          </div><br/>
+          <b-button size='is-medium' type='is-success' @click='playAgain'>Play Again !</b-button><br/><br/>
         </div>
       </div>
     </div>
@@ -115,7 +116,7 @@ export default {
 
   data () {
     return {
-      status: 'Waiting for players...',
+      status: 'Waiting for player...',
       myName: localStorage.getItem('name'),
       friendName: '',
 
@@ -143,13 +144,43 @@ export default {
   },
 
   methods: {
+    init () {
+      if (!localStorage.getItem('gameCode') || localStorage.getItem('gameCode').length !== this.$GAME_CODE_LENGTH) {
+        this.$router.push('/')
+        return
+      }
+
+      this.game = this.$refs.game
+      this.svg = d3.select(this.$refs.game)
+      this.makeGameBoard()
+
+      this.gameCode = localStorage.getItem('gameCode')
+
+      if (!sessionStorage.getItem('myID')) {
+        sessionStorage.setItem('myID', parseInt(Math.random().toString().substr(2, 4)))
+      }
+
+      this.myID = sessionStorage.getItem('myID')
+
+      this.players[this.myID] = {
+        name: this.myName,
+        colors: [randomColor({luminosity: 'bright'})]
+      }
+      this.$set(this.playerTurns, this.myID, false)
+
+      this.connect()
+    },
+
     connect () {
       this.p2pt = new P2PT(announceURLs, 'vett' + this.gameCode)
 
       const $this = this
 
       this.p2pt.on('peerconnect', (peer) => {
-        $this.myDiceNumber = parseInt(Math.random().toString().substr(2, 1))
+        if (this.gameFinished) {
+          return
+        }
+
         $this.friend = peer
 
         this.p2pt.send(peer, JSON.stringify({
@@ -184,10 +215,16 @@ export default {
             colors: msg.colors
           }
 
-          this.$set(this.playerTurns, msg.playerID, false)
+          $this.playerTurns[msg.playerID] = false
 
           // Set first item in array to true
-          $this.playerTurns[$this.playerTurns.indexOf(false)] = true
+          $this.$set(this.playerTurns, $this.playerTurns.indexOf(false), true)
+        } else if (msg.type === 'playagain') {
+          this.$buefy.toast.open({
+            message: 'Your opponent wants to play again. Click the Play Again button at the bottom if you want to.',
+            position: 'is-top',
+            type: 'is-warning'
+          })
         }
       })
 
@@ -320,6 +357,16 @@ export default {
         this.$buefy.toast.open({
           message: 'Waiting for players to join...',
           position: 'is-bottom',
+          type: 'is-warning'
+        })
+
+        return false
+      }
+
+      if (this.gameFinished) {
+        this.$buefy.toast.open({
+          message: 'Game finished. There\'s a "Play Again" button at the bottom',
+          position: 'is-top',
           type: 'is-warning'
         })
 
@@ -527,38 +574,27 @@ export default {
 
     playAudio (audioID) {
       this.$refs['audio-' + audioID][0].play()
+    },
+
+    playAgain () {
+      var players = this.players
+      
+      // Reset data
+      Object.assign(this.$data, this.$options.data.apply(this))
+
+      this.p2pt.send(this.friend, JSON.stringify({
+        'type': 'playagain'
+      }))
+
+      this.p2pt.destroy()
+      this.svg.selectAll('*').remove()
+
+      this.init()
     }
   },
 
   mounted () {
-    if (!localStorage.getItem('gameCode') || localStorage.getItem('gameCode').length !== this.$GAME_CODE_LENGTH) {
-      this.$router.push('/')
-      return
-    }
-
-    this.game = this.$refs.game
-    this.svg = d3.select(this.$refs.game)
-    this.makeGameBoard()
-
-    this.gameCode = localStorage.getItem('gameCode')
-
-    if (localStorage.getItem('gameCreator')) {
-      this.myTurn = true
-    }
-
-    if (!sessionStorage.getItem('myID')) {
-      sessionStorage.setItem('myID', parseInt(Math.random().toString().substr(2, 4)))
-    }
-
-    this.myID = sessionStorage.getItem('myID')
-
-    this.players[this.myID] = {
-      name: this.myName,
-      colors: [randomColor({luminosity: 'bright'})]
-    }
-    this.$set(this.playerTurns, this.myID, false)
-
-    this.connect()
+    this.init()
   }
 }
 </script>
