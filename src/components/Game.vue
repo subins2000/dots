@@ -220,8 +220,8 @@ export default {
           // Add box
           cell.append('rect')
             .attr('class', 'cell')
-            .attr('width', cellWidth - cellMargin)
-            .attr('height', cellWidth - cellMargin)
+            .attr('width', cellWidth)
+            .attr('height', cellWidth)
             .attr('x', cellMargin - 3)
             .attr('y', cellMargin - 3)
             .attr('id', i + '-' + j)
