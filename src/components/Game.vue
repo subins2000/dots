@@ -605,6 +605,10 @@ svg text::selection {
   stroke: #BBB;
 }
 
+#game .cell, #game .line {
+  transition: 0.5s all;
+}
+
 .scoreboard {
   margin: 0 auto;
 }
