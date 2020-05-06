@@ -50,13 +50,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
       <div>
         <table class='table scoreboard content'>
           <tbody>
-            <tr v-bind:class='{ "has-background-primary": myTurn }'>
-              <td>{{ myName }}</td>
-              <td>{{ myScore }}</td>
-            </tr>
-            <tr v-bind:class='[!myTurn ? "has-background-primary" : ""]'>
-              <td>{{ friendName }}</td>
-              <td>{{ opponentScore }}</td>
+            <tr v-for='p in players' v-bind:style='"border: 3px dashed " + p.colors[0]'>
+              <td>{{ p.name }}</td>
+              <td>{{ p.score }}</td>
             </tr>
           </tbody>
         </table>
@@ -91,7 +87,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import * as d3 from 'd3'
 import { P2PT } from 'p2pt'
 
-var randomColor = require('randomcolor');
+var randomColor = () => {
+  return `hsla(${~~(360 * Math.random())},70%,50%,0.8)`
+}
 
 var announceURLs = [
   "wss://tracker.openwebtorrent.com",
@@ -128,7 +126,7 @@ export default {
       gameCode: 'ckO2',
       gameFinished: false,
       gameStatus: 'playerwait',
-      audio: ['box', 'mark'],
+      audio: ['box', 'mark', 'end'],
 
       players: {},
       playerTurns: []
@@ -166,7 +164,8 @@ export default {
 
       this.players[this.myID] = {
         name: this.myName,
-        colors: [randomColor({luminosity: 'bright'})]
+        colors: [randomColor()],
+        score: 0
       }
       this.$set(this.playerTurns, this.myID, false)
 
@@ -214,7 +213,8 @@ export default {
           
           $this.players[msg.playerID] = {
             name: msg.name,
-            colors: msg.colors
+            colors: msg.colors,
+            score: 0
           }
 
           $this.playerTurns[msg.playerID] = false
@@ -419,11 +419,7 @@ export default {
             .attr('text-anchor', 'middle')
             .text(this.players[playerID].name[0])
 
-          if (this.myTurn) {
-            this.myScore++
-          } else {
-            this.opponentScore++
-          }
+          this.players[playerID].score++
 
           audioToPlay = 'box'
 
@@ -432,9 +428,24 @@ export default {
             // All cells completed
             this.gameFinished = true
 
-            if (this.myScore === this.opponentScore) {
+            var largestScore = 0
+            var smallestScore = Infinity
+            
+            var player
+            for (var i in this.players) {
+              player = this.players[i]
+              if (player.score > largestScore) {
+                largestScore = player.score
+              }
+              
+              if (player.score < smallestScore) {
+                smallestScore = player.score
+              }
+            }
+
+            if (largestScore === smallestScore) {
               this.gameStatus = 'draw'
-            } else if (this.myScore > this.opponentScore) {
+            } else if (largestScore === this.players[this.myID].score) {
               this.gameStatus = 'win'
             } else {
               this.gameStatus = 'lose'
@@ -652,9 +663,5 @@ svg text::selection {
 
 .scoreboard {
   margin: 0 auto;
-}
-
-.scoreboard tr.has-background-primary {
-  color: #fff;
 }
 </style>
