@@ -66,17 +66,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </div>
         <div id='game-end' class='content' v-if='gameFinished'>
           <h1 class='is-size-1'>Game Over</h1>
-          <div v-if='gameStatus === "draw"'>
-            <h3 class='is-size-3'>Draw !</h3>
-            <p>Y'all played it to a draw ! 😱</p>
-          </div>
-          <div v-else-if='gameStatus === "win"'>
-            <h3 class='is-size-3'>You win !</h3>
-            <p>You won the game ! 🥳🥳</p>
-          </div>
-          <div v-else>
-            <h3 class='is-size-3'>You lost !</h3>
-            <p>Tough luck, you lost this game :(</p>
+          <div>
+            <div v-if='gameStatus === "draw"'>
+              <h3 class='is-size-3'>Draw !</h3>
+              <p>Y'all played it to a draw ! 😱</p>
+            </div>
+            <div v-else-if='gameStatus === "win"'>
+              <h3 class='is-size-3'>You win !</h3>
+              <p>You won the game ! 🥳🥳</p>
+            </div>
+            <div v-else>
+              <h3 class='is-size-3'>You lost !</h3>
+              <p>Tough luck, you lost this game :(</p>
+            </div>
           </div><br/>
           <b-button size='is-medium' type='is-success' @click='playAgain'>Play Again !</b-button><br/><br/>
         </div>
