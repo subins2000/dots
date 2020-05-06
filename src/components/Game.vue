@@ -415,8 +415,14 @@ export default {
           box.classList.add('active')
           box.style.fill = this.players[playerID].colors[0]
 
-          box = d3.select(box)
-          box.append('text')
+          // Select parent <g> of box
+          box = d3.select(box.parentNode)
+          box
+            .insert('text')
+            .attr('x', cellWidth / 2)
+            .attr('y', cellWidth / 2)
+            .attr('dominant-baseline', 'middle')
+            .attr('text-anchor', 'middle')
             .text(this.players[playerID].name[0])
 
           if (this.myTurn) {
@@ -549,9 +555,9 @@ export default {
     copyGameCode() {
       this.$buefy.toast.open({
         duration: 2000,
-        message: `Game Code Copied !!!`,
+        message: `Game Code Copied !`,
         position: 'is-top',
-        type: 'is-primary'
+        type: 'is-success'
       })
     },
 
