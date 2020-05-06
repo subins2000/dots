@@ -52,6 +52,11 @@ export default {
   mounted () {
     localStorage.removeItem('gameCreator')
     localStorage.removeItem('gameCode')
+
+    var gameCode = this.$route.query.g
+    if (gameCode) {
+      this.gameCode = gameCode
+    }
   }
 }
 </script>

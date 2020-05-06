@@ -40,7 +40,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     </div>
     <div class='container' id='game-content'>
       <div class='content' id='game-wrapper'>
-        <svg id='game' ref='game' viewBox='0 0 280 280'></svg>
+        <svg id='game' ref='game' viewBox='0 0 260 260' preserveAspectRatio='xMidYMid meet'></svg>
         <div class='is-hidden'>
           <audio v-for='a in audio' v-bind:id='"audio-" + a' v-bind:ref='"audio-" + a' async='async'>
             <source v-bind:src='"static/" + a + ".ogg"' type='audio/ogg'>
@@ -195,9 +195,6 @@ export default {
     },
 
     makeGameBoard () {
-      this.svg.attr('width', '100%')
-      this.svg.attr('height', '100%')
-
       // Add a bit margin
       var game = this.svg.append('g')
         .attr('transform', 'translate(10, 10)')
@@ -577,8 +574,12 @@ export default {
 
 #game-wrapper {
   height: 60vh;
-  width: 60vh;
   margin: 20px auto 0;
+}
+
+#game {
+  width: 97%;
+  height: 100%;
 }
 
 svg {
