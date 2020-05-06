@@ -308,6 +308,7 @@ export default {
       if (this.gameStatus === 'close') {
         this.$buefy.toast.open({
           message: 'Connection lost. Retrying...',
+          position: 'is-bottom',
           type: 'is-error'
         })
         this.p2pt.requestMorePeers()
@@ -318,6 +319,7 @@ export default {
       if (this.gameStatus === 'playerwait') {
         this.$buefy.toast.open({
           message: 'Waiting for players to join...',
+          position: 'is-bottom',
           type: 'is-warning'
         })
 
@@ -518,7 +520,7 @@ export default {
       this.$buefy.toast.open({
         duration: 2000,
         message: `Game Code Copied !`,
-        position: 'is-top',
+        position: 'is-bottom',
         type: 'is-success'
       })
     },

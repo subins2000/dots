@@ -7,10 +7,10 @@
           <input type='text' class='input' id='playerName' name='name' v-model='playerName' v-focus placeholder='Type your name here' />
         </div>
         <div class='content'>
-          <button class='button is-medium is-success is-center'>Play !</button>
-        </div><br/><br/>
+          <button class='button is-medium is-success is-center'>Join Game !</button>
+        </div><br/>
         <div class='content'>
-          Share this link with your friend to join the game :
+          <p>Share this link with your friend for them to join the game :</p>
           <div class="row">
             <div class="col-sm-12">
               <div class="form-control wizard-form-control d-flex align-items-center testing-code px-20px mb-10px">
