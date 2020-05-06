@@ -10,6 +10,7 @@ import 'buefy/dist/buefy.css'
 import App from './App'
 import router from './router'
 
+import CopyLink from './components/CopyLink.vue'
 import GameTitle from './components/GameTitle.vue'
 import Footer from './components/Footer.vue'
 
@@ -17,6 +18,7 @@ Vue.use(Buefy)
 Vue.config.productionTip = false
 Vue.use(VueClipboard)
 
+Vue.component('CopyLink', CopyLink)
 Vue.component('GameTitle', GameTitle)
 Vue.component('Footer', Footer)
 

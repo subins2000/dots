@@ -25,13 +25,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <nav class='level is-mobile'>
           <div class='level-left'>
             <span class='level-item'>
-              <span class='has-text-weight-bold'></b>{{ gameCode }}</span>&nbsp;
-              <span class='level-item'>
-                <b-button size='is-small' type='is-success' outlined @click='copyGameCode' v-clipboard='gameCode'>Copy</b-button>
-              </span>
-              <span class='level-item has-text-centered'>{{ status }}</span>
+              <router-link to='/' class='button'>Vett</router-link>
             </span>
           </div>
+          <span class='level-item has-text-centered'>{{ status }}</span>
           <div class='level-right' style='text-align: right;'>
             <span class='level-item' v-if='friendName'>Playing with {{ friendName }}</span>
           </div>
@@ -79,6 +76,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
           <b-button size='is-medium' type='is-success' @click='playAgain'>Play Again !</b-button><br/><br/>
         </div>
       </div>
+      <CopyLink v-if='gameStatus === "playerwait"' />
     </div>
   </div>
 </template>
