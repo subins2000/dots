@@ -87,7 +87,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import * as d3 from 'd3'
 import { P2PT } from 'p2pt'
 
-var randomColor = require('randomcolor');
+var randomColor = () => {
+  return `hsla(${~~(360 * Math.random())},70%,50%,0.8)`
+}
 
 var announceURLs = [
   "wss://tracker.openwebtorrent.com",
@@ -162,7 +164,7 @@ export default {
 
       this.players[this.myID] = {
         name: this.myName,
-        colors: [randomColor({luminosity: 'bright'})],
+        colors: [randomColor()],
         score: 0
       }
       this.$set(this.playerTurns, this.myID, false)
