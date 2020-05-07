@@ -91,7 +91,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script>
 import * as d3 from 'd3'
-import { P2PT } from 'p2pt'
+const P2PT = require('p2pt')
 
 var randomColor = () => {
   return `hsla(${~~(360 * Math.random())},70%,50%,0.8)`
@@ -222,7 +222,14 @@ export default {
           name: $this.myName,
           colors: $this.players[$this.myID].colors,
           historyLength: this.gameHistory.length
-        }))
+        })).then(([peer, msg]) => {
+          // msg will have the player count
+          if (msg > this.playerTurns.length) {
+            $this.expectingPlayerCount = msg
+            $this.gameStatus = 'restore'
+            $this.status = 'Restoring game'
+          }
+        })
 
         $this.gameStatus = 'joined'
         $this.status = ''
@@ -232,14 +239,16 @@ export default {
         var player
         for (var id in $this.players) {
           player = $this.players[id]
-          if (player.conn.id === peer.id) {
+          if (player.conn && player.conn.id === peer.id) {
             delete $this.playerTurns[id]
             delete $this.players[id]
+
+            $this.gameStatus = 'close'
+            $this.status = 'Connection lost'
+
             break
           }
         }
-        $this.gameStatus = 'close'
-        $this.status = 'Connection lost'
       })
 
       this.p2pt.on('msg', (peer, msg) => {
@@ -264,6 +273,8 @@ export default {
           // Probably rejoining because connection lost or joined in middle of game
           // Paavam
           if (msg.historyLength < this.gameHistory.length) {
+            peer.respond($this.playerTurns.length)
+            
             // Everyone shouldn't send them (singular) gamestate.
             var whoWillSend
             // Find first player in queue
@@ -290,8 +301,10 @@ export default {
                 gameState.game.colors = joinedPlayers[msg.playerID]
               }
 
-              this.p2pt.send(peer, JSON.stringify(gameState))
+              $this.p2pt.send(peer, JSON.stringify(gameState))
             }
+
+            $this.updateScores()
           } else {
             joinedPlayers[msg.playerID] = msg.colors
 
@@ -433,7 +446,7 @@ export default {
     },
 
     onLineClick (e) {
-      if (this.gameStatus === 'close') {
+      if (this.gameStatus === 'close' && this.playerTurns.length === 1) {
         this.$buefy.toast.open({
           message: 'Connection lost. Retrying...',
           position: 'is-bottom',
@@ -510,6 +523,7 @@ export default {
           box = this.game.querySelector('.cell[id="' + id + '"]')
           
           box.classList.add('active')
+          box.playerID = playerID
           box.style.fill = this.players[playerID].colors[0]
 
           // Select parent <g> of box
@@ -531,6 +545,8 @@ export default {
 
           var cells = this.game.getElementsByClassName('cell')
           if (cells.length === this.game.getElementsByClassName('cell active').length) {
+            this.updateScores()
+
             // All cells completed
             this.gameFinished = true
 
@@ -759,11 +775,34 @@ export default {
 
       this.gameStatus = 'play'
       this.status = ''
+    },
+
+    updateScores () {
+      var markedBoxes = Array.from(this.game.getElementsByClassName('cell active'))
+
+      var playerScores = []
+
+      for (var playerID in this.playerTurns) {
+        playerScores[playerID] = 0
+      }
+
+      markedBoxes.forEach(e => {
+        playerScores[e.playerID]++
+      })
+
+      for (var playerID in playerScores) {
+        this.players[playerID].score = playerScores[playerID]
+      }
     }
   },
 
   mounted () {
     this.init()
+  },
+
+  beforeDestroy() {
+    this.p2pt.destroy()
+    this.svg.selectAll('*').remove()
   }
 }
 </script>
