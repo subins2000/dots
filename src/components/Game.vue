@@ -194,6 +194,7 @@ export default {
 
     connect () {
       this.p2pt = new P2PT(announceURLs, 'vett' + this.gameCode)
+      this.p2pt.start()
 
       const $this = this
 
@@ -236,12 +237,14 @@ export default {
 
           $this.activateLine($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'), msg.playerID)
         } else if (msg.type === 'join') {
-          $this.players[msg.playerID] = {
+          $this.$set($this.players, msg.playerID, {
             conn: peer,
             name: msg.name,
             colors: msg.colors,
             score: 0
-          }
+          })
+
+          console.log(msg.playerID)
 
           $this.playerTurns[msg.playerID] = false
 
@@ -292,8 +295,6 @@ export default {
           $this.timeToRestoreGame()
         }
       })
-
-      this.p2pt.start()
     },
 
     makeGameBoard () {
