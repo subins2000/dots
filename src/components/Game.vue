@@ -454,7 +454,7 @@ export default {
       this.activateLine(elem, this.myID)
     },
 
-    activateLine (line, playerID) {
+    activateLine (line, playerID, playAudio = true) {
       var audioToPlay = 'mark'
 
       line.classList.add('active')
@@ -546,7 +546,8 @@ export default {
         this.$set(this.playerTurns, nextPlayerID, true)
       }
 
-      this.playAudio(audioToPlay)
+      if (playAudio)
+        this.playAudio(audioToPlay)
     },
 
     boxComplete (activeLine) {
@@ -693,7 +694,7 @@ export default {
       for (var hi in history) {
         h = history[hi] // [playerID, lineType, lineID]
 
-        this.activateLine(this.game.querySelector('.' + h[1] + 'line[id="' + h[2] + '"]'), h[0])
+        this.activateLine(this.game.querySelector('.' + h[1] + 'line[id="' + h[2] + '"]'), h[0], false)
       }
     },
 
