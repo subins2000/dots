@@ -49,7 +49,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
       <div>
         <table class='table scoreboard content'>
           <tbody>
-            <tr v-for='p in players' v-bind:style='"border: 3px dashed " + p.colors[0]' v-if='reRenderScoreboard'>
+            <tr v-for='(p, pid) in players' v-bind:style='"border: 3px dashed " + p.colors[0]' v-bind:key='pid' v-if='reRenderScoreboard'>
               <td>{{ p.name }}</td>
               <td>{{ p.score }}</td>
             </tr>
@@ -131,7 +131,7 @@ export default {
 
   data () {
     return {
-      status: 'Waiting for player...',
+      status: 'Waiting for players...',
       myName: localStorage.getItem('name'),
 
       myTurn: false,
@@ -207,12 +207,7 @@ export default {
           playerID: $this.myID,
           name: $this.myName,
           colors: $this.players[$this.myID].colors
-        })).then(([peer, msg]) => {
-          // The reply, if there is, would be the game state
-          var msg = JSON.parse(msg)
-          restoreGameData = msg
-          $this.timeToRestoreGame()
-        })
+        }))
 
         $this.gameStatus = 'joined'
         $this.status = ''
@@ -266,19 +261,22 @@ export default {
 
             // Lucky you ! You get to restore their game
             if (whoWillSend == $this.myID) {
-              peer.respond(JSON.stringify({
-                playerCount: Object.keys(this.players).length,
-                gameHistory: gameHistory
+              this.p2pt.send(peer, JSON.stringify({
+                type: 'gameRestore',
+                game: {
+                  playerCount: Object.keys(this.players).length,
+                  gameHistory: gameHistory
+                }
               }))
             }
           } else {
             joinedPlayers.push(msg.playerID)
-          }
 
-          // There won't be a 'true' value if it's a new game
-          if ($this.playerTurns.indexOf(true) === -1) {
-            // Set first item in array to true
-            $this.$set(this.playerTurns, $this.playerTurns.indexOf(false), true)
+            // There won't be a 'true' value if it's a new game
+            if ($this.playerTurns.indexOf(true) === -1) {
+              // Set first item in array to true
+              $this.$set(this.playerTurns, $this.playerTurns.indexOf(false), true)
+            }
           }
 
           $this.timeToRestoreGame()
@@ -289,6 +287,9 @@ export default {
             type: 'is-warning',
             duration: 6000
           })
+        } else if (msg.type === 'gameRestore') {
+          restoreGameData = msg.game
+          $this.timeToRestoreGame()
         }
       })
 
@@ -451,7 +452,6 @@ export default {
       })
 
       this.activateLine(elem, this.myID)
-      console.log(gameHistory)
     },
 
     activateLine (line, playerID) {
@@ -528,18 +528,21 @@ export default {
         // A box was made because of this line. So, one more turn
         this.playerTurns[playerID] = true
       } else {
+        playerID = parseInt(playerID)
+
+        this.playerTurns[playerID] = false
+
         /**
           * Get the playerID of the next player after the current player in array
           * indexOf() second param is startIndex
           */
-        if (playerID == this.playerTurns.length - 1) {
+        if (playerID === this.playerTurns.length - 1) {
           var nextPlayerID = this.playerTurns.indexOf(false, 0) // Get first item in array
         } else {
-          var nextPlayerID = this.playerTurns.indexOf(false, playerID)
+          var nextPlayerID = this.playerTurns.indexOf(false, playerID + 1) // +1 cause don't want to include this playerID
         }
         
         // Vue watch only gets triggered if changed with $set : https://vuejs.org/v2/guide/reactivity.html#For-Arrays
-        this.playerTurns[playerID] = false
         this.$set(this.playerTurns, nextPlayerID, true)
       }
 
@@ -698,7 +701,6 @@ export default {
      * Will restore game if all players info is obtained
      */
     timeToRestoreGame () {
-      console.log(restoreGameData)
       if (!restoreGameData) {
         return false
       }
