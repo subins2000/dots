@@ -124,11 +124,6 @@ var joinedPlayers = {}
  */
 var restoreGameData = false
 
-/**
- * History of all line markings
- */
-var gameHistory = []
-
 export default {
   name: 'Game',
 
@@ -162,7 +157,12 @@ export default {
       playerTurns: [],
 
       // For some weird reason, score update isn't immediate after property change. Tried :key and .$set and yet it didn't work. So had to go with this terrible hack
-      reRenderScoreboard: true
+      reRenderScoreboard: true,
+
+      /**
+       * History of all line markings
+       */
+      gameHistory: []
     }
   },
 
@@ -221,7 +221,7 @@ export default {
           playerID: $this.myID,
           name: $this.myName,
           colors: $this.players[$this.myID].colors,
-          historyLength: gameHistory.length
+          historyLength: this.gameHistory.length
         }))
 
         $this.gameStatus = 'joined'
@@ -263,7 +263,7 @@ export default {
           // This player's game history is not the latest
           // Probably rejoining because connection lost or joined in middle of game
           // Paavam
-          if (msg.historyLength < gameHistory.length) {
+          if (msg.historyLength < this.gameHistory.length) {
             // Everyone shouldn't send them (singular) gamestate.
             var whoWillSend
             // Find first player in queue
@@ -280,7 +280,7 @@ export default {
                 type: 'gameRestore',
                 game: {
                   playerCount: Object.keys(this.players).length,
-                  gameHistory: gameHistory,
+                  gameHistory: this.gameHistory,
                   colors: joinedPlayers[msg.playerID]
                 }
               }
@@ -498,7 +498,7 @@ export default {
       line.classList.add('active')
       line.style.stroke = this.players[playerID].colors[0]
 
-      gameHistory.push([playerID, line.classList.contains('hline') ? 'h' : 'v', line.id])
+      this.gameHistory.push([playerID, line.classList.contains('hline') ? 'h' : 'v', line.id])
 
       var completedBoxes = this.boxComplete(line)
       var box
@@ -758,6 +758,7 @@ export default {
       restoreGameData = false
 
       this.gameStatus = 'play'
+      this.status = ''
     }
   },
 
