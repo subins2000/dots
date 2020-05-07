@@ -32,7 +32,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
           </div>
           <span class='level-item has-text-centered'>{{ status }}</span>
           <div class='level-right' style='text-align: right;'>
-            <span class='level-item' v-if='gameStatus !== "playerwait"'>{{ Object.keys(players).length }}&nbsp;Players</span>
+            <span class='level-item' v-if='gameStatus !== "playerwait"'>
+              {{ Object.keys(players).length }}
+              <span v-if='gameStatus === "restore"'>
+                /&nbsp;{{ expectingPlayerCount }}
+              </span>
+              &nbsp;Players
+            </span>
           </div>
         </nav>
       </div>
@@ -110,10 +116,11 @@ var cellMargin = 5
  * A historical list of all players (IDs) who have joined
  * Used for restoring gamestate when new player/connection lost player joins
  */
-var joinedPlayers = []
+var joinedPlayers = {}
 
 /**
  * Storage for restoring gamestate if needed
+ * Only used for players who need to restore game from other peers
  */
 var restoreGameData = false
 
@@ -141,6 +148,12 @@ export default {
       audio: ['box', 'mark', 'end'],
 
       players: {},
+
+      /**
+       * If game is in restoring mode, and not all players
+       * info has been fetched, then this will have the required count
+       */
+      expectingPlayerCount: 0,
 
       /**
        * Will have playerID => false
@@ -203,11 +216,12 @@ export default {
           return
         }
 
-        this.p2pt.send(peer, JSON.stringify({
+        $this.p2pt.send(peer, JSON.stringify({
           type: 'join',
           playerID: $this.myID,
           name: $this.myName,
-          colors: $this.players[$this.myID].colors
+          colors: $this.players[$this.myID].colors,
+          historyLength: gameHistory.length
         }))
 
         $this.gameStatus = 'joined'
@@ -244,14 +258,12 @@ export default {
             score: 0
           })
 
-          console.log(msg.playerID)
-
           $this.playerTurns[msg.playerID] = false
 
-          // This player had already been here.
-          // Probably rejoining because connection lost.
+          // This player's game history is not the latest
+          // Probably rejoining because connection lost or joined in middle of game
           // Paavam
-          if (joinedPlayers.indexOf(msg.playerID) !== -1) {
+          if (msg.historyLength < gameHistory.length) {
             // Everyone shouldn't send them (singular) gamestate.
             var whoWillSend
             // Find first player in queue
@@ -264,16 +276,24 @@ export default {
 
             // Lucky you ! You get to restore their game
             if (whoWillSend == $this.myID) {
-              this.p2pt.send(peer, JSON.stringify({
+              var gameState = {
                 type: 'gameRestore',
                 game: {
                   playerCount: Object.keys(this.players).length,
-                  gameHistory: gameHistory
+                  gameHistory: gameHistory,
+                  colors: joinedPlayers[msg.playerID]
                 }
-              }))
+              }
+
+              // This player has joined before, and we know their color
+              if (joinedPlayers[msg.playerID]) {
+                gameState.game.colors = joinedPlayers[msg.playerID]
+              }
+
+              this.p2pt.send(peer, JSON.stringify(gameState))
             }
           } else {
-            joinedPlayers.push(msg.playerID)
+            joinedPlayers[msg.playerID] = msg.colors
 
             // There won't be a 'true' value if it's a new game
             if ($this.playerTurns.indexOf(true) === -1) {
@@ -292,6 +312,11 @@ export default {
           })
         } else if (msg.type === 'gameRestore') {
           restoreGameData = msg.game
+
+          this.expectingPlayerCount = msg.game.playerCount
+          this.gameStatus = 'restore'
+          this.status = 'Restoring game'
+
           $this.timeToRestoreGame()
         }
       })
@@ -425,6 +450,18 @@ export default {
           position: 'is-bottom',
           type: 'is-warning'
         })
+        this.p2pt.requestMorePeers()
+
+        return false
+      }
+
+      if (this.gameStatus === 'restore') {
+        this.$buefy.toast.open({
+          message: 'Game is being restored...',
+          position: 'is-bottom',
+          type: 'is-warning'
+        })
+        this.p2pt.requestMorePeers()
 
         return false
       }
@@ -709,11 +746,18 @@ export default {
       
       // Only restore if all online, active players info is obtained. Otherwise this.players object will be incomplete and activateLine() will fail
       if (restoreGameData.playerCount > Object.keys(this.players).length) {
+        this.p2pt.requestMorePeers()
         return false
+      }
+
+      if (restoreGameData.colors) {
+        this.players[this.myID].colors = restoreGameData.colors
       }
 
       this.restoreGameState(restoreGameData.gameHistory)
       restoreGameData = false
+
+      this.gameStatus = 'play'
     }
   },
 
