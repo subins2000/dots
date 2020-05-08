@@ -35,7 +35,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <span class='level-item' v-if='gameStatus !== "playerwait"'>
               {{ Object.keys(players).length }}
               <span v-if='gameStatus === "restore"'>
-                /&nbsp;{{ expectingPlayerCount }}
+                /{{ expectingPlayerCount }}
               </span>
               &nbsp;Players
             </span>
@@ -111,12 +111,6 @@ if (window.location.hostname === "localhost") {
 var gridSize = 6
 var cellWidth = 40
 var cellMargin = 5
-
-/**
- * A historical list of all players (IDs) who have joined
- * Used for restoring gamestate when new player/connection lost player joins
- */
-var joinedPlayers = {}
 
 /**
  * Storage for restoring gamestate if needed
@@ -199,13 +193,14 @@ export default {
 
       if (!sessionStorage.getItem('myID')) {
         sessionStorage.setItem('myID', parseInt(Math.random().toString().substr(2, 4)))
+        sessionStorage.setItem('myColor', randomColor())
       }
 
       this.myID = sessionStorage.getItem('myID')
 
       this.players[this.myID] = {
         name: this.myName,
-        colors: [randomColor()],
+        colors: [sessionStorage.getItem('myColor')],
         score: 0
       }
       this.$set(this.playerTurns, this.myID, false)
@@ -229,15 +224,9 @@ export default {
           playerID: $this.myID,
           name: $this.myName,
           colors: $this.players[$this.myID].colors,
-          historyLength: this.gameHistory.length
-        })).then(([peer, msg]) => {
-          // msg will have the player count
-          if (msg > this.playerTurns.length) {
-            $this.expectingPlayerCount = msg
-            $this.gameStatus = 'restore'
-            $this.status = 'Restoring game'
-          }
-        })
+          historyLength: $this.gameHistory.length,
+          playerCount: Object.keys(this.players).length
+        }))
 
         $this.gameStatus = 'joined'
         $this.status = ''
@@ -253,6 +242,8 @@ export default {
 
             $this.gameStatus = 'close'
             $this.status = 'Connection lost'
+
+            $this.fixPlayerTurns()
 
             break
           }
@@ -281,8 +272,6 @@ export default {
           // Probably rejoining because connection lost or joined in middle of game
           // Paavam
           if (msg.historyLength < this.gameHistory.length) {
-            peer.respond($this.playerTurns.length)
-            
             // Everyone shouldn't send them (singular) gamestate.
             var whoWillSend
             // Find first player in queue
@@ -297,24 +286,22 @@ export default {
             if (whoWillSend == $this.myID) {
               var gameState = {
                 type: 'gameRestore',
-                game: {
-                  playerCount: Object.keys(this.players).length,
-                  gameHistory: this.gameHistory,
-                  colors: joinedPlayers[msg.playerID]
-                }
-              }
-
-              // This player has joined before, and we know their color
-              if (joinedPlayers[msg.playerID]) {
-                gameState.game.colors = joinedPlayers[msg.playerID]
+                gameHistory: this.gameHistory
               }
 
               $this.p2pt.send(peer, JSON.stringify(gameState))
             }
 
             $this.updateScores()
-          } else {
-            joinedPlayers[msg.playerID] = msg.colors
+          }
+
+          if (msg.historyLength > $this.gameHistory.length) {
+            // My game history is not latest
+            // I probably joined the game in between
+            $this.expectingPlayerCount = Math.max($this.expectingPlayerCount, msg.playerCount)
+
+            $this.gameStatus = 'restore'
+            $this.status = 'Restoring game'
           }
 
           $this.fixPlayerTurns()
@@ -328,9 +315,8 @@ export default {
             duration: 6000
           })
         } else if (msg.type === 'gameRestore') {
-          restoreGameData = msg.game
+          restoreGameData = msg
 
-          this.expectingPlayerCount = msg.game.playerCount
           this.gameStatus = 'restore'
           this.status = 'Restoring game'
 
@@ -479,6 +465,7 @@ export default {
           type: 'is-warning'
         })
         this.p2pt.requestMorePeers()
+        this.timeToRestoreGame()
 
         return false
       }
@@ -743,12 +730,13 @@ export default {
      * Will restore game if all players info is obtained
      */
     timeToRestoreGame () {
+      console.log(restoreGameData)
       if (!restoreGameData) {
         return false
       }
       
       // Only restore if all online, active players info is obtained. Otherwise this.players object will be incomplete and activateLine() will fail
-      if (restoreGameData.playerCount > Object.keys(this.players).length) {
+      if (this.expectingPlayerCount > Object.keys(this.players).length) {
         this.p2pt.requestMorePeers()
         return false
       }
@@ -762,6 +750,7 @@ export default {
 
       this.gameStatus = 'play'
       this.status = ''
+      this.expectingPlayerCount = 0
     },
 
     updateScores () {
