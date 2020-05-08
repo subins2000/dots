@@ -161,8 +161,16 @@ export default {
 
       /**
        * History of all line markings
+       * Value: [playerID, lineType, lineID]
        */
-      gameHistory: []
+      gameHistory: [],
+
+      /**
+       * History of all line markings that made a box completion
+       * Value: lineType+lineID
+       * Eg: v4-3, h4-1
+       */
+      boxLineHistory: []
     }
   },
 
@@ -307,13 +315,9 @@ export default {
             $this.updateScores()
           } else {
             joinedPlayers[msg.playerID] = msg.colors
-
-            // There won't be a 'true' value if it's a new game
-            if ($this.playerTurns.indexOf(true) === -1) {
-              // Set first item in array to true
-              $this.$set(this.playerTurns, $this.playerTurns.indexOf(false), true)
-            }
           }
+
+          $this.fixPlayerTurns()
 
           $this.timeToRestoreGame()
         } else if (msg.type === 'playagain') {
@@ -511,7 +515,8 @@ export default {
       line.classList.add('active')
       line.style.stroke = this.players[playerID].colors[0]
 
-      this.gameHistory.push([playerID, line.classList.contains('hline') ? 'h' : 'v', line.id])
+      var lineType = line.classList.contains('hline') ? 'h' : 'v'
+      this.gameHistory.push([playerID, lineType, line.id])
 
       var completedBoxes = this.boxComplete(line)
       var box
@@ -525,6 +530,8 @@ export default {
           box.classList.add('active')
           box.playerID = playerID
           box.style.fill = this.players[playerID].colors[0]
+
+          this.boxLineHistory.push(lineType + line.id)
 
           // Select parent <g> of box
           box = d3.select(box.parentNode)
@@ -578,27 +585,7 @@ export default {
         }
       }
 
-      if (audioToPlay === 'box') {
-        // A box was made because of this line. So, one more turn
-        this.playerTurns[playerID] = true
-      } else {
-        playerID = parseInt(playerID)
-
-        this.playerTurns[playerID] = false
-
-        /**
-          * Get the playerID of the next player after the current player in array
-          * indexOf() second param is startIndex
-          */
-        if (playerID === this.playerTurns.length - 1) {
-          var nextPlayerID = this.playerTurns.indexOf(false, 0) // Get first item in array
-        } else {
-          var nextPlayerID = this.playerTurns.indexOf(false, playerID + 1) // +1 cause don't want to include this playerID
-        }
-        
-        // Vue watch only gets triggered if changed with $set : https://vuejs.org/v2/guide/reactivity.html#For-Arrays
-        this.$set(this.playerTurns, nextPlayerID, true)
-      }
+      this.fixPlayerTurns()
 
       if (playAudio)
         this.playAudio(audioToPlay)
@@ -793,6 +780,48 @@ export default {
       for (var playerID in playerScores) {
         this.players[playerID].score = playerScores[playerID]
       }
+    },
+
+    /**
+     * Calculate whose turn is it next
+     * and change playerTurns array accordingly
+     */
+     fixPlayerTurns () {
+      for (var playerID in this.playerTurns) {
+        this.playerTurns[playerID] = false
+      }
+
+      var nextPlayerID;
+
+      if (this.gameHistory.length === 0) {
+        // First player in list has the turn
+        nextPlayerID = this.playerTurns.indexOf(false)
+      } else {
+        var lastPlay = this.gameHistory[this.gameHistory.length - 1]
+        var lastPlayerID = parseInt(lastPlay[0])
+        var lastPlayedLine = lastPlay[1] + lastPlay[2]
+
+        if (this.boxLineHistory.indexOf(lastPlayedLine) !== -1) {
+          // The last played line made a box. So repeat turn
+          nextPlayerID = lastPlayerID
+        } else {
+          /**
+           * Get the playerID of the next player after the current player in array
+           * indexOf() second param is startIndex
+           */
+          if (lastPlayerID === this.playerTurns.length - 1) {
+            // Get first item in array
+            nextPlayerID = this.playerTurns.indexOf(false, 0)
+          } else {
+            // +1 cause don't want to include this playerID
+            nextPlayerID = this.playerTurns.indexOf(false, lastPlayerID + 1)
+          }
+        }
+      }
+
+      // Vue watch only gets triggered if changed with $set
+      // https://vuejs.org/v2/guide/reactivity.html#For-Arrays
+      this.$set(this.playerTurns, nextPlayerID, true)
     }
   },
 
