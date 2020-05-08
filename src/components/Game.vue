@@ -32,7 +32,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
           </div>
           <span class='level-item has-text-centered'>{{ status }}</span>
           <div class='level-right' style='text-align: right;'>
-            <span class='level-item' v-if='friendName'>Playing with {{ friendName }}</span>
+            <span class='level-item' v-if='gameStatus !== "playerwait"'>
+              {{ Object.keys(players).length }}
+              <span v-if='gameStatus === "restore"'>
+                /{{ expectingPlayerCount }}
+              </span>
+              &nbsp;Players
+            </span>
           </div>
         </nav>
       </div>
@@ -49,7 +55,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
       <div>
         <table class='table scoreboard content'>
           <tbody>
-            <tr v-for='p in players' v-bind:style='"border: 3px dashed " + p.colors[0]' v-if='reRenderScoreboard'>
+            <tr v-for='(p, pid) in players' v-bind:style='"border: 3px dashed " + p.colors[0]' v-bind:key='pid' v-if='reRenderScoreboard'>
               <td>{{ p.name }}</td>
               <td>{{ p.score }}</td>
             </tr>
@@ -85,7 +91,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script>
 import * as d3 from 'd3'
-import { P2PT } from 'p2pt'
+const P2PT = require('p2pt')
 
 var randomColor = () => {
   return `hsla(${~~(360 * Math.random())},70%,50%,0.8)`
@@ -106,33 +112,59 @@ var gridSize = 6
 var cellWidth = 40
 var cellMargin = 5
 
+/**
+ * Storage for restoring gamestate if needed
+ * Only used for players who need to restore game from other peers
+ */
+var restoreGameData = false
+
 export default {
   name: 'Game',
-  
-  friend: null,
+
   p2pt: null,
 
   myID: '',
 
   data () {
     return {
-      status: 'Waiting for player...',
+      status: 'Waiting for players...',
       myName: localStorage.getItem('name'),
-      friendName: '',
 
       myTurn: false,
-      myScore: 0,
-      opponentScore: 0,
       gameCode: 'ckO2',
       gameFinished: false,
       gameStatus: 'playerwait',
       audio: ['box', 'mark', 'end'],
 
       players: {},
+
+      /**
+       * If game is in restoring mode, and not all players
+       * info has been fetched, then this will have the required count
+       */
+      expectingPlayerCount: 0,
+
+      /**
+       * Will have playerID => false
+       * The player whose turn is now will only have true
+       */
       playerTurns: [],
 
       // For some weird reason, score update isn't immediate after property change. Tried :key and .$set and yet it didn't work. So had to go with this terrible hack
-      reRenderScoreboard: true
+      reRenderScoreboard: true,
+
+      /**
+       * History of all line markings
+       * Value: [playerID, lineType, lineID]
+       */
+      gameHistory: [],
+
+      /**
+       * History of all line markings that made a box completion
+       * Value: lineType+lineID
+       * Eg: v4-3, h4-1
+       */
+      boxLineHistory: []
     }
   },
 
@@ -161,13 +193,14 @@ export default {
 
       if (!sessionStorage.getItem('myID')) {
         sessionStorage.setItem('myID', parseInt(Math.random().toString().substr(2, 4)))
+        sessionStorage.setItem('myColor', randomColor())
       }
 
       this.myID = sessionStorage.getItem('myID')
 
       this.players[this.myID] = {
         name: this.myName,
-        colors: [randomColor()],
+        colors: [sessionStorage.getItem('myColor')],
         score: 0
       }
       this.$set(this.playerTurns, this.myID, false)
@@ -177,6 +210,7 @@ export default {
 
     connect () {
       this.p2pt = new P2PT(announceURLs, 'vett' + this.gameCode)
+      this.p2pt.start()
 
       const $this = this
 
@@ -185,13 +219,13 @@ export default {
           return
         }
 
-        $this.friend = peer
-
-        this.p2pt.send(peer, JSON.stringify({
-          type: 'init',
+        $this.p2pt.send(peer, JSON.stringify({
+          type: 'join',
           playerID: $this.myID,
           name: $this.myName,
-          colors: $this.players[$this.myID].colors
+          colors: $this.players[$this.myID].colors,
+          historyLength: $this.gameHistory.length,
+          playerCount: Object.keys(this.players).length
         }))
 
         $this.gameStatus = 'joined'
@@ -199,8 +233,21 @@ export default {
       })
 
       this.p2pt.on('peerclose', (peer) => {
-        $this.gameStatus = 'close'
-        $this.status = 'Connection lost'
+        var player
+        for (var id in $this.players) {
+          player = $this.players[id]
+          if (player.conn && player.conn.id === peer.id) {
+            delete $this.playerTurns[id]
+            delete $this.players[id]
+
+            $this.gameStatus = 'close'
+            $this.status = 'Connection lost'
+
+            $this.fixPlayerTurns()
+
+            break
+          }
+        }
       })
 
       this.p2pt.on('msg', (peer, msg) => {
@@ -211,30 +258,71 @@ export default {
           var [row, col] = msg.move.split('-')
 
           $this.activateLine($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'), msg.playerID)
-        } else if (msg.type === 'init') {
-          $this.friendName = msg.name
-          
-          $this.players[msg.playerID] = {
+        } else if (msg.type === 'join') {
+          $this.$set($this.players, msg.playerID, {
+            conn: peer,
             name: msg.name,
             colors: msg.colors,
             score: 0
-          }
+          })
 
           $this.playerTurns[msg.playerID] = false
 
-          // Set first item in array to true
-          $this.$set(this.playerTurns, $this.playerTurns.indexOf(false), true)
+          // This player's game history is not the latest
+          // Probably rejoining because connection lost or joined in middle of game
+          // Paavam
+          if (msg.historyLength < this.gameHistory.length) {
+            // Everyone shouldn't send them (singular) gamestate.
+            var whoWillSend
+            // Find first player in queue
+            for (var pid in $this.playerTurns) {
+              if (pid !== msg.playerID) {
+                whoWillSend = pid
+                break
+              }
+            }
+
+            // Lucky you ! You get to restore their game
+            if (whoWillSend == $this.myID) {
+              var gameState = {
+                type: 'gameRestore',
+                gameHistory: this.gameHistory
+              }
+
+              $this.p2pt.send(peer, JSON.stringify(gameState))
+            }
+
+            $this.updateScores()
+          }
+
+          if (msg.historyLength > $this.gameHistory.length) {
+            // My game history is not latest
+            // I probably joined the game in between
+            $this.expectingPlayerCount = Math.max($this.expectingPlayerCount, msg.playerCount)
+
+            $this.gameStatus = 'restore'
+            $this.status = 'Restoring game'
+          }
+
+          $this.fixPlayerTurns()
+
+          $this.timeToRestoreGame()
         } else if (msg.type === 'playagain') {
-          this.$buefy.toast.open({
-            message: 'Your opponent wants to play again. Click the Play Again button at the bottom if you want to.',
+          $this.$buefy.toast.open({
+            message: 'One of your opponents want to play again. Click the Play Again button at the bottom if you want to.',
             position: 'is-top',
             type: 'is-warning',
             duration: 6000
           })
+        } else if (msg.type === 'gameRestore') {
+          restoreGameData = msg
+
+          this.gameStatus = 'restore'
+          this.status = 'Restoring game'
+
+          $this.timeToRestoreGame()
         }
       })
-
-      this.p2pt.start()
     },
 
     makeGameBoard () {
@@ -348,7 +436,7 @@ export default {
     },
 
     onLineClick (e) {
-      if (this.gameStatus === 'close') {
+      if (this.gameStatus === 'close' && this.playerTurns.length === 1) {
         this.$buefy.toast.open({
           message: 'Connection lost. Retrying...',
           position: 'is-bottom',
@@ -365,6 +453,19 @@ export default {
           position: 'is-bottom',
           type: 'is-warning'
         })
+        this.p2pt.requestMorePeers()
+
+        return false
+      }
+
+      if (this.gameStatus === 'restore') {
+        this.$buefy.toast.open({
+          message: 'Game is being restored...',
+          position: 'is-bottom',
+          type: 'is-warning'
+        })
+        this.p2pt.requestMorePeers()
+        this.timeToRestoreGame()
 
         return false
       }
@@ -385,21 +486,24 @@ export default {
         return false
       }
 
-      this.p2pt.send(this.friend, JSON.stringify({
+      this.sendToAll({
         type: 'move',
         playerID: this.myID,
         line: elem.classList.contains('hline') ? 'h' : 'v',
         move: elem.id
-      }))
+      })
 
       this.activateLine(elem, this.myID)
     },
 
-    activateLine (line, playerID) {
+    activateLine (line, playerID, playAudio = true) {
       var audioToPlay = 'mark'
 
       line.classList.add('active')
       line.style.stroke = this.players[playerID].colors[0]
+
+      var lineType = line.classList.contains('hline') ? 'h' : 'v'
+      this.gameHistory.push([playerID, lineType, line.id])
 
       var completedBoxes = this.boxComplete(line)
       var box
@@ -411,7 +515,10 @@ export default {
           box = this.game.querySelector('.cell[id="' + id + '"]')
           
           box.classList.add('active')
+          box.playerID = playerID
           box.style.fill = this.players[playerID].colors[0]
+
+          this.boxLineHistory.push(lineType + line.id)
 
           // Select parent <g> of box
           box = d3.select(box.parentNode)
@@ -432,6 +539,8 @@ export default {
 
           var cells = this.game.getElementsByClassName('cell')
           if (cells.length === this.game.getElementsByClassName('cell active').length) {
+            this.updateScores()
+
             // All cells completed
             this.gameFinished = true
 
@@ -463,26 +572,10 @@ export default {
         }
       }
 
-      if (audioToPlay === 'box') {
-        // A box was made because of this line. So, one more turn
-        this.playerTurns[playerID] = true
-      } else {
-        /**
-          * Get the playerID of the next player after the current player in array
-          * indexOf() second param is startIndex
-          */
-        if (playerID == this.playerTurns.length - 1) {
-          var nextPlayerID = this.playerTurns.indexOf(false, 0) // Get first item in array
-        } else {
-          var nextPlayerID = this.playerTurns.indexOf(false, playerID)
-        }
-        
-        // Vue watch only gets triggered if changed with $set : https://vuejs.org/v2/guide/reactivity.html#For-Arrays
-        this.playerTurns[playerID] = false
-        this.$set(this.playerTurns, nextPlayerID, true)
-      }
+      this.fixPlayerTurns()
 
-      this.playAudio(audioToPlay)
+      if (playAudio)
+        this.playAudio(audioToPlay)
     },
 
     boxComplete (activeLine) {
@@ -602,19 +695,132 @@ export default {
       // Reset data
       Object.assign(this.$data, this.$options.data.apply(this))
 
-      this.p2pt.send(this.friend, JSON.stringify({
+      this.sendToAll({
         'type': 'playagain'
-      }))
+      })
 
       this.p2pt.destroy()
       this.svg.selectAll('*').remove()
 
       this.init()
+    },
+
+    sendToAll (json) {
+      var player;
+      for (var id in this.players) {
+        player = this.players[id]
+
+        // Me (the player) won't have the conn
+        if (player.conn) {
+          this.p2pt.send(player.conn, JSON.stringify(json))
+        }
+      }
+    },
+
+    restoreGameState (history) {
+      var h
+      for (var hi in history) {
+        h = history[hi] // [playerID, lineType, lineID]
+
+        this.activateLine(this.game.querySelector('.' + h[1] + 'line[id="' + h[2] + '"]'), h[0], false)
+      }
+    },
+
+    /**
+     * Will restore game if all players info is obtained
+     */
+    timeToRestoreGame () {
+      console.log(restoreGameData)
+      if (!restoreGameData) {
+        return false
+      }
+      
+      // Only restore if all online, active players info is obtained. Otherwise this.players object will be incomplete and activateLine() will fail
+      if (this.expectingPlayerCount > Object.keys(this.players).length) {
+        this.p2pt.requestMorePeers()
+        return false
+      }
+
+      if (restoreGameData.colors) {
+        this.players[this.myID].colors = restoreGameData.colors
+      }
+
+      this.restoreGameState(restoreGameData.gameHistory)
+      restoreGameData = false
+
+      this.gameStatus = 'play'
+      this.status = ''
+      this.expectingPlayerCount = 0
+    },
+
+    updateScores () {
+      var markedBoxes = Array.from(this.game.getElementsByClassName('cell active'))
+
+      var playerScores = []
+
+      for (var playerID in this.playerTurns) {
+        playerScores[playerID] = 0
+      }
+
+      markedBoxes.forEach(e => {
+        playerScores[e.playerID]++
+      })
+
+      for (var playerID in playerScores) {
+        this.players[playerID].score = playerScores[playerID]
+      }
+    },
+
+    /**
+     * Calculate whose turn is it next
+     * and change playerTurns array accordingly
+     */
+     fixPlayerTurns () {
+      for (var playerID in this.playerTurns) {
+        this.playerTurns[playerID] = false
+      }
+
+      var nextPlayerID;
+
+      if (this.gameHistory.length === 0) {
+        // First player in list has the turn
+        nextPlayerID = this.playerTurns.indexOf(false)
+      } else {
+        var lastPlay = this.gameHistory[this.gameHistory.length - 1]
+        var lastPlayerID = parseInt(lastPlay[0])
+        var lastPlayedLine = lastPlay[1] + lastPlay[2]
+
+        if (this.boxLineHistory.indexOf(lastPlayedLine) !== -1) {
+          // The last played line made a box. So repeat turn
+          nextPlayerID = lastPlayerID
+        } else {
+          /**
+           * Get the playerID of the next player after the current player in array
+           * indexOf() second param is startIndex
+           */
+          if (lastPlayerID === this.playerTurns.length - 1) {
+            // Get first item in array
+            nextPlayerID = this.playerTurns.indexOf(false, 0)
+          } else {
+            // +1 cause don't want to include this playerID
+            nextPlayerID = this.playerTurns.indexOf(false, lastPlayerID + 1)
+          }
+        }
+      }
+
+      // Vue watch only gets triggered if changed with $set
+      // https://vuejs.org/v2/guide/reactivity.html#For-Arrays
+      this.$set(this.playerTurns, nextPlayerID, true)
     }
   },
 
   mounted () {
     this.init()
+  },
+
+  beforeDestroy() {
+    this.p2pt.destroy()
+    this.svg.selectAll('*').remove()
   }
 }
 </script>
