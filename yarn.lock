@@ -8508,10 +8508,9 @@ vm-browserify@^1.0.1:
   resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
 
-vue-beautiful-chat@^2.3.1:
+vue-beautiful-chat@mattmezza/vue-beautiful-chat#146/head:
   version "2.3.1"
-  resolved "https://registry.yarnpkg.com/vue-beautiful-chat/-/vue-beautiful-chat-2.3.1.tgz#e79a9f68f86485496738743e9b52b53a6bdaa3b5"
-  integrity sha512-JVKYEYuUGvLG1QpBHTe+KuZ7jSCEcxJddwvsJHNPGRYuRa4iFkFxFBxE88gy0b1wTn59N2W89bZ54vKyc5jBvQ==
+  resolved "https://codeload.github.com/mattmezza/vue-beautiful-chat/tar.gz/4082f07fc691a4f3d93eba39c77c31812667b48e"
   dependencies:
     autolinker "^1.8.3"
     babel-preset-env "^1.6.1"

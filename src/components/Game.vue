@@ -310,11 +310,12 @@ export default {
         for (var id in $this.players) {
           player = $this.players[id]
           if (player.conn && player.conn.id === peer.id) {
+            var name = $this.players[id].name
+
             delete $this.playerTurns[id]
             delete $this.players[id]
 
-            $this.gameStatus = 'close'
-            $this.status = 'Connection lost'
+            $this.chatAddMsg('!game!', `Connection lost with ${name}`)
 
             $this.fixPlayerTurns()
 
@@ -955,6 +956,14 @@ export default {
     if (this.p2pt) {
       this.p2pt.destroy()
       this.svg.selectAll('*').remove()
+    }
+  },
+
+  beforeRouteLeave (to, from, next) {
+    if (this.gameHistoryIndex > 0) {
+      next(confirm('Do you want to leave the game ?'))
+    } else {
+      next(true)
     }
   }
 }
