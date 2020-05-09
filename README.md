@@ -1,6 +1,6 @@
 # Vett
 
-[Playe the Game Here!](//vett.space)
+[Play the Game Here!](//vett.space)
 
 When we were kids, we used to play Dots & Boxes game (called As `Poojyam Vett` (പൂജ്യം വെട്ട്) in our local language Malayalam) in school. It's still a popular game in school : https://en.wikipedia.org/wiki/Dots_and_Boxes
 
@@ -14,3 +14,10 @@ Built with VueJS, d3.js, [P2PT](//github.com/subins2000/p2pt). Uses WebTorrent t
 yarn install
 yarn run
 ```
+
+## Thanks
+
+* Sounds
+  * [tmkappelt](https://freesound.org/people/tmkappelt/sounds/85702/) - CC0 license
+  * [shinephoenixstormcrow](https://freesound.org/people/shinephoenixstormcrow/sounds/337049/) - CC-BY license
+  * [LittleRobotSoundFactory](https://freesound.org/people/LittleRobotSoundFactory/sounds/270404/) - CC-BY license
