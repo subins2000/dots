@@ -268,37 +268,14 @@ export default {
 
           $this.playerTurns[msg.playerID] = false
 
-          // This player's game history is not the latest
-          // Probably rejoining because connection lost or joined in middle of game
-          // Paavam
-          if (msg.historyLength < this.gameHistory.length) {
-            // Everyone shouldn't send them (singular) gamestate.
-            var whoWillSend
-            // Find first player in queue
-            for (var pid in $this.playerTurns) {
-              if (pid !== msg.playerID) {
-                whoWillSend = pid
-                break
-              }
-            }
-
-            // Lucky you ! You get to restore their game
-            if (whoWillSend == $this.myID) {
-              var gameState = {
-                type: 'gameRestore',
-                gameHistory: this.gameHistory
-              }
-
-              $this.p2pt.send(peer, JSON.stringify(gameState))
-            }
-
-            $this.updateScores()
-          }
-
           if (msg.historyLength > $this.gameHistory.length) {
             // My game history is not latest
             // I probably joined the game in between
             $this.expectingPlayerCount = Math.max($this.expectingPlayerCount, msg.playerCount)
+
+            $this.p2pt.send(peer, JSON.stringify({
+              type: 'gameState'
+            }))
 
             $this.gameStatus = 'restore'
             $this.status = 'Restoring game'
@@ -314,6 +291,13 @@ export default {
             type: 'is-warning',
             duration: 6000
           })
+        } else if (msg.type === 'gameState') {
+          var gameState = {
+            type: 'gameRestore',
+            gameHistory: this.gameHistory
+          }
+
+          $this.p2pt.send(peer, JSON.stringify(gameState))
         } else if (msg.type === 'gameRestore') {
           restoreGameData = msg
 
@@ -819,8 +803,10 @@ export default {
   },
 
   beforeDestroy() {
-    this.p2pt.destroy()
-    this.svg.selectAll('*').remove()
+    if (this.p2pt) {
+      this.p2pt.destroy()
+      this.svg.selectAll('*').remove()
+    }
   }
 }
 </script>
