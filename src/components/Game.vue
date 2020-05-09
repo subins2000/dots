@@ -370,7 +370,11 @@ export default {
 
           $this.timeToRestoreGame()
         } else if (msg.type === 'chat') {
-          this.chatAddMsg(msg.name, msg.text)
+          if (msg.emoji) {
+            this.chatAddMsg(msg.name, msg.emoji, 'emoji')
+          } else {
+            this.chatAddMsg(msg.name, msg.text)
+          }
         }
       })
     },
@@ -881,13 +885,23 @@ export default {
     chatSendMessage (msgData) {
       var name = this.players[this.myID].name
 
-      this.sendToAll({
-        type: 'chat',
-        name: name,
-        text: msgData.data.text
-      })
+      if (msgData.type === 'emoji') {
+        this.sendToAll({
+          type: 'chat',
+          name: name,
+          emoji: msgData.data.emoji
+        })
 
-      this.chatAddMsg('me', msgData.data.text)
+        this.chatAddMsg('me', msgData.data.emoji, 'emoji')
+      } else {
+        this.sendToAll({
+          type: 'chat',
+          name: name,
+          text: msgData.data.text
+        })
+
+        this.chatAddMsg('me', msgData.data.text)
+      }
     },
 
     chatOpen () {
@@ -901,12 +915,19 @@ export default {
       this.chatIsOpen = false
     },
 
-    chatAddMsg (name, msg) {
-      this.chatMsgs.push({
-        type: 'text',
+    chatAddMsg (name, msg, type = 'text') {
+      console.log({
+        type: type === 'text' ? 'text' : 'emoji',
         author: name,
         data: {
-          text: msg
+          [type === 'text' ? 'text' : 'emoji']: msg
+        }
+      })
+      this.chatMsgs.push({
+        type: type === 'text' ? 'text' : 'emoji',
+        author: name,
+        data: {
+          [type === 'text' ? 'text' : 'emoji']: msg
         }
       })
 
