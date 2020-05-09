@@ -86,6 +86,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
       </div>
       <CopyLink v-if='gameStatus === "playerwait"' />
     </div>
+    <beautiful-chat
+      :colors="chatColors"
+      :participants="chatParticipants"
+      :onMessageWasSent="chatSendMessage"
+      :messageList="chatMsgs"
+      :newMessagesCount="chatNewMessagesCount"
+      :isOpen="chatIsOpen"
+      :close="chatClose"
+      :open="chatOpen"
+      :showEmoji="true"
+      :showFile="false"
+      :alwaysScrollToBottom="true"
+      :messageStyling="false"
+    >
+      <template v-slot:text-message-body="scopedProps">
+        <p class='sc-message--system' v-if='scopedProps.message.author !== "!game!" && scopedProps.message.author !== "me"'>
+          <strong>{{ scopedProps.message.author }}</strong>
+          <div style='margin: 3px;'></div>
+        </p>
+        <p class="sc-message--text-content" v-html="scopedProps.messageText"></p>
+        <p v-if="scopedProps.message.data.meta" class='sc-message--meta' :style="{color: scopedProps.messageColors.color}">{{scopedProps.message.data.meta}}</p>
+      </template>
+    </beautiful-chat>
   </div>
 </template>
 
@@ -166,7 +189,51 @@ export default {
        * Value: lineType+lineID
        * Eg: v4-3, h4-1
        */
-      boxLineHistory: []
+      boxLineHistory: [],
+
+      /**
+       * ----
+       * CHAT
+       * ----
+       */
+      chatIsOpen: false,
+
+      chatParticipants: [
+        {
+          id: '!game!',
+          name: 'Game',
+          imageUrl: 'static/favicon.png'
+        }
+      ],
+
+      chatNewMessagesCount: 0,
+
+      chatMsgs: [],
+
+      chatColors: {
+        header: {
+          bg: '#4e8cff',
+          text: '#ffffff'
+        },
+        launcher: {
+          bg: '#4e8cff'
+        },
+        messageList: {
+          bg: '#ffffff'
+        },
+        sentMessage: {
+          bg: '#4e8cff',
+          text: '#ffffff'
+        },
+        receivedMessage: {
+          bg: '#eaeaea',
+          text: '#222222'
+        },
+        userInput: {
+          bg: '#f4f7f9',
+          text: '#565867'
+        }
+      }
     }
   },
 
@@ -176,6 +243,10 @@ export default {
       
       handler () {
         this.myTurn = this.playerTurns.indexOf(true) == this.myID
+
+        if (this.myTurn) {
+          this.chatAddMsg('!game!', 'It\'s your turn now !')
+        }
       }
     }
   },
@@ -239,11 +310,12 @@ export default {
         for (var id in $this.players) {
           player = $this.players[id]
           if (player.conn && player.conn.id === peer.id) {
+            var name = $this.players[id].name
+
             delete $this.playerTurns[id]
             delete $this.players[id]
 
-            $this.gameStatus = 'close'
-            $this.status = 'Connection lost'
+            $this.chatAddMsg('!game!', `Connection lost with ${name}`)
 
             $this.fixPlayerTurns()
 
@@ -269,6 +341,12 @@ export default {
           })
 
           $this.playerTurns[msg.playerID] = false
+
+          $this.chatParticipants.push({
+            id: msg.name,
+            name: msg.name,
+            imageUrl: 'static/avatar.png'
+          })
 
           if (msg.historyIndex > $this.gameHistoryIndex) {
             // My game history is not latest
@@ -307,6 +385,12 @@ export default {
           this.status = 'Restoring game'
 
           $this.timeToRestoreGame()
+        } else if (msg.type === 'chat') {
+          if (msg.emoji) {
+            this.chatAddMsg(msg.name, msg.emoji, 'emoji')
+          } else {
+            this.chatAddMsg(msg.name, msg.text)
+          }
         }
       })
     },
@@ -726,7 +810,6 @@ export default {
      * Will restore game if all players info is obtained
      */
     timeToRestoreGame () {
-      console.log(restoreGameData)
       if (!restoreGameData) {
         return false
       }
@@ -807,6 +890,61 @@ export default {
       // Vue watch only gets triggered if changed with $set
       // https://vuejs.org/v2/guide/reactivity.html#For-Arrays
       this.$set(this.playerTurns, nextPlayerID, true)
+    },
+
+    /**
+     * ----
+     * CHAT
+     * ----
+     */
+    chatSendMessage (msgData) {
+      var name = this.players[this.myID].name
+
+      if (msgData.type === 'emoji') {
+        this.sendToAll({
+          type: 'chat',
+          name: name,
+          emoji: msgData.data.emoji
+        })
+
+        this.chatAddMsg('me', msgData.data.emoji, 'emoji')
+      } else {
+        this.sendToAll({
+          type: 'chat',
+          name: name,
+          text: msgData.data.text
+        })
+
+        this.chatAddMsg('me', msgData.data.text)
+      }
+    },
+
+    chatOpen () {
+      // called when the user clicks on the fab button to open the chat
+      this.chatIsOpen = true
+      this.chatNewMessagesCount = 0
+    },
+
+    chatClose () {
+      // called when the user clicks on the botton to close the chat
+      this.chatIsOpen = false
+    },
+
+    chatAddMsg (name, msg, type = 'text') {
+      this.chatMsgs.push({
+        type: type === 'text' ? 'text' : 'emoji',
+        author: name,
+        data: {
+          [type === 'text' ? 'text' : 'emoji']: msg,
+          meta: new Date().toLocaleTimeString()
+        }
+      })
+
+      if (name !== '!game!') {
+        this.chatNewMessagesCount = this.chatIsOpen
+          ? this.chatNewMessagesCount
+          : this.chatNewMessagesCount + 1
+      }
     }
   },
 
@@ -818,6 +956,14 @@ export default {
     if (this.p2pt) {
       this.p2pt.destroy()
       this.svg.selectAll('*').remove()
+    }
+  },
+
+  beforeRouteLeave (to, from, next) {
+    if (this.gameHistoryIndex > 0) {
+      next(confirm('Do you want to leave the game ?'))
+    } else {
+      next(true)
     }
   }
 }
