@@ -332,6 +332,12 @@ export default {
 
           $this.playerTurns[msg.playerID] = false
 
+          $this.chatParticipants.push({
+            id: msg.name,
+            name: msg.name,
+            imageUrl: 'static/avatar.png'
+          })
+
           if (msg.historyIndex > $this.gameHistoryIndex) {
             // My game history is not latest
             // I probably joined the game in between
