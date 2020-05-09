@@ -7,9 +7,8 @@
           <input class='input is-medium is-flat' id='linkInput' @click="$event.target.select()" :value='gameLink' readonly />
           <span class='button is-primary is-medium' @click='copyGameLink' v-clipboard='gameLink'>Copy</span>
         </div>
-        <p>Only start the game after everyone join</p>
       </div>
-    </div><br/>
+    </div>
   </div>
 </template>
 

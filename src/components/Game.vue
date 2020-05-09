@@ -53,7 +53,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </div>
       </div>
       <div>
-        <CopyLink v-if='gameStatus === "playerwait"' />
+        <div class='content' v-if='gameStatus === "playerwait"'>
+          <CopyLink />
+          <span>Only start the game after everyone join.</span><br/>
+          <span>Tap to draw line</span>
+        </div>
         <div class='content' v-if='!gameFinished'>
           <span v-if='myTurn'>Your turn</span>
           <span v-else>Waiting for opponent's move</span>
