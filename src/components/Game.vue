@@ -934,7 +934,8 @@ export default {
         type: type === 'text' ? 'text' : 'emoji',
         author: name,
         data: {
-          [type === 'text' ? 'text' : 'emoji']: msg
+          [type === 'text' ? 'text' : 'emoji']: msg,
+          meta: new Date().toLocaleTimeString()
         }
       })
 
