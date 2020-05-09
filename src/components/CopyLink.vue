@@ -28,7 +28,7 @@ export default {
         duration: 2000,
         message: `Invite Link Copied !`,
         position: 'is-top',
-        type: 'is-primary'
+        type: 'is-success'
       })
     },
   }
