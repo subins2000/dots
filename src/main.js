@@ -7,6 +7,8 @@ import VueClipboard from 'vue-clipboard2'
 import Buefy from 'buefy'
 import 'buefy/dist/buefy.css'
 
+import Chat from 'vue-beautiful-chat'
+
 import App from './App'
 import router from './router'
 
@@ -15,6 +17,8 @@ import GameTitle from './components/GameTitle.vue'
 import Footer from './components/Footer.vue'
 
 Vue.use(Buefy)
+Vue.use(Chat)
+
 Vue.config.productionTip = false
 Vue.use(VueClipboard)
 

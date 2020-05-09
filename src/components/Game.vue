@@ -86,6 +86,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
       </div>
       <CopyLink v-if='gameStatus === "playerwait"' />
     </div>
+    <beautiful-chat
+      :colors="chatColors"
+      :participants="chatParticipants"
+      :onMessageWasSent="chatSendMessage"
+      :messageList="chatMsgs"
+      :newMessagesCount="chatNewMessagesCount"
+      :isOpen="chatIsOpen"
+      :close="chatClose"
+      :open="chatOpen"
+      :showEmoji="true"
+      :showFile="false"
+      :alwaysScrollToBottom="true"
+      :messageStyling="false"
+      />
   </div>
 </template>
 
@@ -166,7 +180,51 @@ export default {
        * Value: lineType+lineID
        * Eg: v4-3, h4-1
        */
-      boxLineHistory: []
+      boxLineHistory: [],
+
+      /**
+       * ----
+       * CHAT
+       * ----
+       */
+      chatIsOpen: false,
+
+      chatParticipants: [
+        {
+          id: '!game!',
+          name: 'Game',
+          imageUrl: 'static/favicon.png'
+        }
+      ],
+
+      chatNewMessagesCount: 0,
+
+      chatMsgs: [],
+
+      chatColors: {
+        header: {
+          bg: '#4e8cff',
+          text: '#ffffff'
+        },
+        launcher: {
+          bg: '#4e8cff'
+        },
+        messageList: {
+          bg: '#ffffff'
+        },
+        sentMessage: {
+          bg: '#4e8cff',
+          text: '#ffffff'
+        },
+        receivedMessage: {
+          bg: '#eaeaea',
+          text: '#222222'
+        },
+        userInput: {
+          bg: '#f4f7f9',
+          text: '#565867'
+        }
+      }
     }
   },
 
@@ -176,6 +234,10 @@ export default {
       
       handler () {
         this.myTurn = this.playerTurns.indexOf(true) == this.myID
+
+        if (this.myTurn) {
+          this.chatAddMsg('!game!', 'It\'s your turn now !')
+        }
       }
     }
   },
@@ -307,6 +369,8 @@ export default {
           this.status = 'Restoring game'
 
           $this.timeToRestoreGame()
+        } else if (msg.type === 'chat') {
+          this.chatAddMsg(msg.name, msg.text)
         }
       })
     },
@@ -807,6 +871,50 @@ export default {
       // Vue watch only gets triggered if changed with $set
       // https://vuejs.org/v2/guide/reactivity.html#For-Arrays
       this.$set(this.playerTurns, nextPlayerID, true)
+    },
+
+    /**
+     * ----
+     * CHAT
+     * ----
+     */
+    chatSendMessage (msgData) {
+      var name = this.players[this.myID].name
+
+      this.sendToAll({
+        type: 'chat',
+        name: name,
+        text: msgData.data.text
+      })
+
+      this.chatAddMsg('me', msgData.data.text)
+    },
+
+    chatOpen () {
+      // called when the user clicks on the fab button to open the chat
+      this.chatIsOpen = true
+      this.chatNewMessagesCount = 0
+    },
+
+    chatClose () {
+      // called when the user clicks on the botton to close the chat
+      this.chatIsOpen = false
+    },
+
+    chatAddMsg (name, msg) {
+      this.chatMsgs.push({
+        type: 'text',
+        author: name,
+        data: {
+          text: msg
+        }
+      })
+
+      if (name !== '!game!') {
+        this.chatNewMessagesCount = this.chatIsOpen
+          ? this.chatNewMessagesCount
+          : this.chatNewMessagesCount + 1
+      }
     }
   },
 
