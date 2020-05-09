@@ -53,6 +53,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </div>
       </div>
       <div>
+        <CopyLink v-if='gameStatus === "playerwait"' />
         <div class='content' v-if='!gameFinished'>
           <span v-if='myTurn'>Your turn</span>
           <span v-else>Waiting for opponent's move</span>
@@ -84,7 +85,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
           <b-button size='is-medium' type='is-success' @click='playAgain'>Play Again !</b-button><br/><br/>
         </div>
       </div>
-      <CopyLink v-if='gameStatus === "playerwait"' />
     </div>
     <beautiful-chat
       :colors="chatColors"
