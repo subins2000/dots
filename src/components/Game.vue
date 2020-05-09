@@ -155,9 +155,11 @@ export default {
 
       /**
        * History of all line markings
+       * Index: a sequential ID
        * Value: [playerID, lineType, lineID]
        */
-      gameHistory: [],
+      gameHistory: {},
+      gameHistoryIndex: -1,
 
       /**
        * History of all line markings that made a box completion
@@ -224,7 +226,7 @@ export default {
           playerID: $this.myID,
           name: $this.myName,
           colors: $this.players[$this.myID].colors,
-          historyLength: $this.gameHistory.length,
+          historyIndex: $this.gameHistoryIndex,
           playerCount: Object.keys(this.players).length
         }))
 
@@ -268,37 +270,14 @@ export default {
 
           $this.playerTurns[msg.playerID] = false
 
-          // This player's game history is not the latest
-          // Probably rejoining because connection lost or joined in middle of game
-          // Paavam
-          if (msg.historyLength < this.gameHistory.length) {
-            // Everyone shouldn't send them (singular) gamestate.
-            var whoWillSend
-            // Find first player in queue
-            for (var pid in $this.playerTurns) {
-              if (pid !== msg.playerID) {
-                whoWillSend = pid
-                break
-              }
-            }
-
-            // Lucky you ! You get to restore their game
-            if (whoWillSend == $this.myID) {
-              var gameState = {
-                type: 'gameRestore',
-                gameHistory: this.gameHistory
-              }
-
-              $this.p2pt.send(peer, JSON.stringify(gameState))
-            }
-
-            $this.updateScores()
-          }
-
-          if (msg.historyLength > $this.gameHistory.length) {
+          if (msg.historyIndex > $this.gameHistoryIndex) {
             // My game history is not latest
             // I probably joined the game in between
             $this.expectingPlayerCount = Math.max($this.expectingPlayerCount, msg.playerCount)
+
+            $this.p2pt.send(peer, JSON.stringify({
+              type: 'gameState'
+            }))
 
             $this.gameStatus = 'restore'
             $this.status = 'Restoring game'
@@ -314,6 +293,13 @@ export default {
             type: 'is-warning',
             duration: 6000
           })
+        } else if (msg.type === 'gameState') {
+          var gameState = {
+            type: 'gameRestore',
+            gameHistory: this.gameHistory
+          }
+
+          $this.p2pt.send(peer, JSON.stringify(gameState))
         } else if (msg.type === 'gameRestore') {
           restoreGameData = msg
 
@@ -496,14 +482,24 @@ export default {
       this.activateLine(elem, this.myID)
     },
 
-    activateLine (line, playerID, playAudio = true) {
+    activateLine (line, playerID, playAudio = true, historyIndex = false) {
+      if (historyIndex && this.gameHistory[historyIndex]) {
+        return
+      }
+
       var audioToPlay = 'mark'
 
       line.classList.add('active')
       line.style.stroke = this.players[playerID].colors[0]
 
       var lineType = line.classList.contains('hline') ? 'h' : 'v'
-      this.gameHistory.push([playerID, lineType, line.id])
+
+      if (historyIndex) {
+        this.gameHistory[historyIndex] = [playerID, lineType, line.id]
+        this.gameHistoryIndex = historyIndex
+      } else {
+        this.gameHistory[++this.gameHistoryIndex] = [playerID, lineType, line.id]
+      }
 
       var completedBoxes = this.boxComplete(line)
       var box
@@ -719,10 +715,10 @@ export default {
 
     restoreGameState (history) {
       var h
-      for (var hi in history) {
-        h = history[hi] // [playerID, lineType, lineID]
+      for (var historyIndex in history) {
+        h = history[historyIndex] // [playerID, lineType, lineID]
 
-        this.activateLine(this.game.querySelector('.' + h[1] + 'line[id="' + h[2] + '"]'), h[0], false)
+        this.activateLine(this.game.querySelector('.' + h[1] + 'line[id="' + h[2] + '"]'), h[0], false, historyIndex)
       }
     },
 
@@ -782,11 +778,11 @@ export default {
 
       var nextPlayerID;
 
-      if (this.gameHistory.length === 0) {
+      if (this.gameHistoryIndex === -1) {
         // First player in list has the turn
         nextPlayerID = this.playerTurns.indexOf(false)
       } else {
-        var lastPlay = this.gameHistory[this.gameHistory.length - 1]
+        var lastPlay = this.gameHistory[this.gameHistoryIndex]
         var lastPlayerID = parseInt(lastPlay[0])
         var lastPlayedLine = lastPlay[1] + lastPlay[2]
 
@@ -819,8 +815,10 @@ export default {
   },
 
   beforeDestroy() {
-    this.p2pt.destroy()
-    this.svg.selectAll('*').remove()
+    if (this.p2pt) {
+      this.p2pt.destroy()
+      this.svg.selectAll('*').remove()
+    }
   }
 }
 </script>
