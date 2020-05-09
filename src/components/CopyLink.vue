@@ -1,14 +1,15 @@
 <template>
   <div class='content'>
-    <p>Share this link with your friend for them to join the game :</p>
+    <p>Share this link with your friends for them to join the game :</p>
     <div class="row">
       <div class="col-sm-12">
         <div class="form-control wizard-form-control d-flex align-items-center testing-code px-20px mb-10px">
           <input class='input is-medium is-flat' id='linkInput' @click="$event.target.select()" :value='gameLink' readonly />
           <span class='button is-primary is-medium' @click='copyGameLink' v-clipboard='gameLink'>Copy</span>
         </div>
+        <p>Only start the game after everyone join</p>
       </div>
-    </div><br/><br/>
+    </div><br/>
   </div>
 </template>
 

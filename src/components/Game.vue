@@ -53,6 +53,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </div>
       </div>
       <div>
+        <div class='content' v-if='!gameFinished'>
+          <span v-if='myTurn'>Your turn</span>
+          <span v-else>Waiting for opponent's move</span>
+        </div>
         <table class='table scoreboard content'>
           <tbody>
             <tr v-for='(p, pid) in players' v-bind:style='"border: 3px dashed " + p.colors[0]' v-bind:key='pid' v-if='reRenderScoreboard'>
@@ -61,10 +65,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             </tr>
           </tbody>
         </table>
-        <div class='content' v-if='!gameFinished'>
-          <span v-if='myTurn'>Your turn</span>
-          <span v-else>Waiting for opponent's move</span>
-        </div>
         <div id='game-end' class='content' v-if='gameFinished'>
           <h1 class='is-size-1'>Game Over</h1>
           <div>
@@ -771,18 +771,28 @@ export default {
 
     playAgain () {
       var players = this.players
-      
-      // Reset data
-      Object.assign(this.$data, this.$options.data.apply(this))
 
       this.sendToAll({
         'type': 'playagain'
       })
 
-      this.p2pt.destroy()
-      this.svg.selectAll('*').remove()
+      this.$buefy.toast.open({
+        message: 'Asking others to play again...',
+        position: 'is-top',
+        type: 'is-warning'
+      })
 
-      this.init()
+      const $this = this
+
+      setTimeout(() => {
+        // Reset data
+        Object.assign(this.$data, $this.$options.data.apply(this))
+
+        $this.p2pt.destroy()
+        $this.svg.selectAll('*').remove()
+
+        $this.init()
+      }, 2000)
     },
 
     sendToAll (json) {
@@ -998,7 +1008,7 @@ export default {
 
 #game-wrapper {
   height: 60vh;
-  margin: 20px auto 0;
+  margin: 20px auto 10px;
 }
 
 #game {
@@ -1035,6 +1045,6 @@ svg text::selection {
 }
 
 .scoreboard {
-  margin: 0 auto;
+  margin: 0 auto 10px;
 }
 </style>
