@@ -945,11 +945,26 @@ export default {
           ? this.chatNewMessagesCount
           : this.chatNewMessagesCount + 1
       }
+    },
+
+    onBeforeUnload (e = null) {
+      if (this.chatIsOpen) {
+        this.chatIsOpen = false
+
+        if (e) {
+          e.preventDefault()
+          e.returnValue = ''
+        }
+
+        return true
+      }
+      return false
     }
   },
 
   mounted () {
     this.init()
+    window.addEventListener('beforeunload', this.onBeforeUnload)
   },
 
   beforeDestroy() {
@@ -957,11 +972,12 @@ export default {
       this.p2pt.destroy()
       this.svg.selectAll('*').remove()
     }
+    window.removeEventListener('beforeunload', this.onBeforeUnload)
   },
 
   beforeRouteLeave (to, from, next) {
-    if (this.gameHistoryIndex > 0) {
-      next(confirm('Do you want to leave the game ?'))
+    if (this.onBeforeUnload()) {
+      next(false)
     } else {
       next(true)
     }
