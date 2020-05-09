@@ -99,7 +99,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
       :showFile="false"
       :alwaysScrollToBottom="true"
       :messageStyling="false"
-      />
+    >
+      <template v-slot:text-message-body="scopedProps">
+        <p class='sc-message--system' v-if='scopedProps.message.author !== "!game!" && scopedProps.message.author !== "me"'>
+          <strong>{{ scopedProps.message.author }}</strong>
+          <div style='margin: 3px;'></div>
+        </p>
+        <p class="sc-message--text-content" v-html="scopedProps.messageText"></p>
+        <p v-if="scopedProps.message.data.meta" class='sc-message--meta' :style="{color: scopedProps.messageColors.color}">{{scopedProps.message.data.meta}}</p>
+      </template>
+    </beautiful-chat>
   </div>
 </template>
 
@@ -800,7 +809,6 @@ export default {
      * Will restore game if all players info is obtained
      */
     timeToRestoreGame () {
-      console.log(restoreGameData)
       if (!restoreGameData) {
         return false
       }
@@ -922,13 +930,6 @@ export default {
     },
 
     chatAddMsg (name, msg, type = 'text') {
-      console.log({
-        type: type === 'text' ? 'text' : 'emoji',
-        author: name,
-        data: {
-          [type === 'text' ? 'text' : 'emoji']: msg
-        }
-      })
       this.chatMsgs.push({
         type: type === 'text' ? 'text' : 'emoji',
         author: name,
