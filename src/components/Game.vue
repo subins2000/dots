@@ -335,6 +335,10 @@ export default {
           var line = msg.line === 'h' ? 'hline' : 'vline'
           var [row, col] = msg.move.split('-')
 
+          if (row.length !== 1 && col.length !== 1) {
+            return
+          }
+
           $this.activateLine($this.game.querySelector('.' + line + '[id="' + row + '-' + col + '"]'), msg.playerID)
         } else if (msg.type === 'join') {
           $this.$set($this.players, msg.playerID, {
