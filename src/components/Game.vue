@@ -820,6 +820,10 @@ export default {
       for (var historyIndex in history) {
         h = history[historyIndex] // [playerID, lineType, lineID]
 
+        if ((h[1] !== 'h' && h[1] !== 'v') || h[2].length !== 3) {
+          continue
+        }
+
         this.activateLine(this.game.querySelector('.' + h[1] + 'line[id="' + h[2] + '"]'), h[0], false, historyIndex)
       }
     },
