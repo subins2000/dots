@@ -37,6 +37,19 @@ Vue.directive('focus', {
 Vue.prototype.$GAME_CODE_LENGTH = 4
 Vue.prototype.$GAME_INVITE_LINK = 'https://vett.space/#/?g='
 
+var announceURLs = [
+  'wss://tracker.openwebtorrent.com',
+  'wss://tracker.sloppyta.co:443/announce',
+  'wss://tracker.novage.com.ua:443/announce',
+  'wss://tracker.btorrent.xyz:443/announce'
+]
+
+if (window.location.hostname === 'localhost') {
+  announceURLs = ['ws://localhost:5000']
+}
+
+Vue.prototype.$GAME_ANNOUNCE_URLS = announceURLs
+
 const store = new Vuex.Store({
   state: {
     audio: true,

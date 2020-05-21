@@ -124,17 +124,6 @@ var randomColor = () => {
   return `hsla(${~~(360 * Math.random())},70%,50%,0.8)`
 }
 
-var announceURLs = [
-  "wss://tracker.openwebtorrent.com",
-  "wss://tracker.sloppyta.co:443/announce",
-  "wss://tracker.novage.com.ua:443/announce",
-  "wss://tracker.btorrent.xyz:443/announce",
-]
-
-if (window.location.hostname === "localhost") {
-  announceURLs = ["ws://localhost:5000"]
-}
-
 var gridSize = 6
 var cellWidth = 40
 var cellMargin = 5
@@ -286,7 +275,7 @@ export default {
     },
 
     connect () {
-      this.p2pt = new P2PT(announceURLs, 'vett' + this.gameCode)
+      this.p2pt = new P2PT(this.$GAME_ANNOUNCE_URLS, 'vett' + this.gameCode)
       this.p2pt.start()
 
       const $this = this
