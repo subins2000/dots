@@ -4,6 +4,7 @@ import Index from '@/components/Index'
 import Register from '@/components/Register'
 import Game from '@/components/Game'
 import Settings from '@/components/Settings'
+import FindPlayers from '@/components/FindPlayers'
 
 Vue.use(Router)
 
@@ -28,6 +29,11 @@ export default new Router({
       path: '/settings',
       name: 'Settings',
       component: Settings
+    },
+    {
+      path: '/find-players',
+      name: 'FindPlayers',
+      component: FindPlayers
     }
   ]
 })
