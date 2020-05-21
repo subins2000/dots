@@ -14,7 +14,9 @@ export default {
   },
 
   methods: {
+    init () {
 
+    }
   },
 
   mounted () {

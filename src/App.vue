@@ -13,7 +13,7 @@ export default {
 
   computed: {
     displayTitle () {
-      return this.$route.name === 'Index' || this.$route.name === 'Register' || this.$route.name === 'Settings'
+      return this.$route.name === 'Index' || this.$route.name === 'Register' || this.$route.name === 'FindPlayers' || this.$route.name === 'Settings'
     }
   }
 }

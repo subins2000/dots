@@ -1,8 +1,17 @@
 <template>
   <div class='container has-text-centered'>  
+    <br/>
     <div class='content'>
-      <button class='button is-medium is-primary is-center' @click='newGame'>Start New Game</button>
+      <div class='columns'>
+        <div class='column has-text-right'>
+          <button class='button is-medium is-primary is-center' @click='newGame'>Host A New Game</button>
+        </div>
+        <div class='column has-text-left'>
+          <router-link to='/find-players' class='button is-success is-medium'>Play With A Random Person</router-link>
+        </div>
+      </div>
     </div>
+
     <div class='content'>
       <strong class='is-primary is-size-3 has-text-centered'>OR</strong>
     </div>
@@ -14,7 +23,7 @@
     </form>
 
     <div class='content'>
-      <router-link to='/settings' class='button is-warning'>Settings</router-link>
+      <router-link to='/settings' class='button is-warning'>Game Settings</router-link>
     </div>
 
     <Footer/>
