@@ -144,7 +144,7 @@ export default {
   data () {
     return {
       status: 'Waiting for players...',
-      myName: localStorage.getItem('name'),
+      myName: this.$store.state.name,
 
       myTurn: false,
       gameCode: 'ckO2',
