@@ -36,6 +36,14 @@ export default {
     saveSettings (e) {
       e.preventDefault()
 
+      if (this.name.trim() === '') {
+        this.$buefy.toast.open({
+          message: 'Name cannot be blank',
+          type: 'is-warning'
+        })
+        return
+      }
+
       this.$store.commit('setName', this.name)
       this.$store.commit('setAudio', this.audio)
 

@@ -27,6 +27,14 @@ export default {
   methods: {
     playGame (e) {
       e.preventDefault()
+      
+      if (this.playerName.trim() === '') {
+        this.$buefy.toast.open({
+          message: 'Name cannot be blank',
+          type: 'is-warning'
+        })
+        return
+      }
 
       this.$buefy.toast.open({
         message: 'Hi ' + this.playerName,
