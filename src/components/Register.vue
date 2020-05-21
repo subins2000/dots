@@ -20,7 +20,7 @@ export default {
   name: 'Register',
   data () {
     return {
-      playerName: localStorage.getItem('name')
+      playerName: this.$store.state.name
     }
   },
 
@@ -33,7 +33,7 @@ export default {
         type: 'is-success'
       })
 
-      localStorage.setItem('name', this.playerName)
+      this.$store.commit('setName', this.playerName)
 
       this.$router.push('game')
     }

@@ -1,7 +1,7 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
-import VueI18n from 'vue-i18n'
+import Vuex from 'vuex'
 import VueClipboard from 'vue-clipboard2'
 
 import Buefy from 'buefy'
@@ -18,6 +18,7 @@ import Footer from './components/Footer.vue'
 
 Vue.use(Buefy)
 Vue.use(Chat)
+Vue.use(Vuex)
 
 Vue.config.productionTip = false
 Vue.use(VueClipboard)
@@ -36,10 +37,38 @@ Vue.directive('focus', {
 Vue.prototype.$GAME_CODE_LENGTH = 4
 Vue.prototype.$GAME_INVITE_LINK = 'https://vett.space/#/?g='
 
+const store = new Vuex.Store({
+  state: {
+    audio: true,
+    name: ''
+  },
+  mutations: {
+    init (state) {
+      // Check if the ID exists
+      if (window.localStorage.getItem('settings')) {
+        this.replaceState(
+          Object.assign(state, JSON.parse(window.localStorage.getItem('settings')))
+        )
+      }
+    },
+
+    setName (state, value) {
+      state.name = value
+    }
+  }
+})
+
+// Store in localstorage
+store.subscribe((mutation, state) => {
+  // Store the state object as a JSON string
+  window.localStorage.setItem('settings', JSON.stringify(state))
+})
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 })
