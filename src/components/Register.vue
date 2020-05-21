@@ -46,9 +46,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-#playerName {
-  width: 70%;
-}
-</style>

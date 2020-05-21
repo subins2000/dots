@@ -9,6 +9,7 @@
           </div>
         </div>
         <div class='field'>
+          <label class='label'>Audio</label>
           <div class='control'>
             <b-checkbox v-model='audio'>Sound Effects</b-checkbox>
           </div>

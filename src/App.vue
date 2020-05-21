@@ -27,4 +27,16 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+@media screen and (max-width: 960px) {
+  .container {
+    padding: 0 5%
+  }
+}
+
+@media screen and (min-width: 900px) {
+  .container {
+    max-width: 900px
+  }
+}
 </style>
