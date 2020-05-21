@@ -13,6 +13,10 @@
       </div>
     </form>
 
+    <div class='content'>
+      <router-link to='/settings' class='button is-warning'>Settings</router-link>
+    </div>
+
     <Footer/>
   </div>
 </template>

@@ -54,6 +54,10 @@ const store = new Vuex.Store({
 
     setName (state, value) {
       state.name = value
+    },
+
+    setAudio (state, value) {
+      state.audio = value
     }
   }
 })
