@@ -3,7 +3,7 @@
     <div class='container has-text-centered'>
       <form @submit='playGame'>
         <div class='content'>
-          <p>What is your name ?</p>
+          <label class='label'>What is your name ?</label>
           <input type='text' class='input' id='playerName' name='name' v-model='playerName' v-focus placeholder='Type your name here' />
         </div>
         <div class='content'>

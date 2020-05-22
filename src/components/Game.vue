@@ -27,7 +27,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <span class='level-item'>
               <router-link to='/' class='button'>Vett !</router-link>
               &nbsp;&nbsp;
-              <span class='has-text-weight-bold' title='Game Code'></b>{{ gameCode }}</span>
+              <span class='has-text-weight-bold' title='Game Code'>{{ gameCode }}</span>
             </span>
           </div>
           <span class='level-item has-text-centered'>{{ status }}</span>
@@ -763,7 +763,8 @@ export default {
     },
 
     playAudio (audioID) {
-      this.$refs['audio-' + audioID][0].play()
+      if (this.$store.state.audio)
+        this.$refs['audio-' + audioID][0].play()
     },
 
     playAgain () {
