@@ -390,6 +390,26 @@ export default {
           }
         }
       })
+    
+      var warningCount = 0
+      this.p2pt.on('trackerwarning', (error, stats) => {
+        warningCount++
+        
+        if (warningCount >= stats.total) {
+          $this.status = 'Cannot connect to WebTorrent trackers'
+
+          $this.$buefy.toast.open({
+            message: 'We couldn\'t connect to any WebTorrent trackers. A page refresh might help.\nYour ISP might be blocking them 🤔',
+            position: 'is-top',
+            type: 'is-danger',
+            duration: 6000
+          })
+        }
+      })
+
+      this.p2pt.on('trackerconnect', () => {
+        warningCount--
+      })
     },
 
     makeGameBoard () {
