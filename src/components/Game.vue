@@ -237,7 +237,7 @@ export default {
       handler () {
         this.myTurn = this.playerTurns.indexOf(true) == this.myID
 
-        if (this.myTurn && this.gameHistoryIndex > 0 && this.gameHistory[this.gameHistoryIndex][0] != this.myID) {
+        if (this.myTurn && this.gameHistoryIndex > 0 && this.gameHistory[this.gameHistoryIndex][0] != this.myID && this.chatIsOpen) {
           this.chatAddMsg('!game!', 'It\'s your turn now !')
         }
       }
