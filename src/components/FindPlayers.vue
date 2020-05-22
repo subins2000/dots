@@ -30,8 +30,6 @@ export default {
       var myDiceNumber = parseInt(Math.random().toString().substr(2, 5))
 
       this.p2pt.on('peerconnect', (peer) => {
-        if (this.offer !== false) return
-
         this.p2pt
           .send(peer, 'play-' + myDiceNumber)
           .then(([peer, peerDiceNumber]) => {
@@ -50,6 +48,7 @@ export default {
           }).catch((error) => {
             this.status = 'Failed connecting to a player. Trying again...'
 
+            this.offer = false
             this.p2pt.requestMorePeers()
           })
       })
@@ -74,7 +73,7 @@ export default {
         } else if (action === 'strt') {
           if (peer.id !== this.offer) return
 
-          this.status = 'Found a player ! Handshaking...'
+          this.status = 'Found a player ! Handshaking with sanitized hands...'
 
           let [blah, gameCode] = msg.split('-')
 
@@ -99,8 +98,10 @@ export default {
 
       this.p2pt.send(peer, 'strt-' + gameCode).catch((error) => {
         failed = true
+        
         this.status = 'Failed connecting to a player. Trying again...'
 
+        this.offer = false
         this.p2pt.requestMorePeers()
       })
     }
