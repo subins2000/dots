@@ -19,7 +19,7 @@ export default {
   data () {
     return {
       offer: false,
-      status: 'Searching for online players...',
+      status: 'Connecting to tracker...',
       count: 0
     }
   },
@@ -97,6 +97,7 @@ export default {
 
       this.p2pt.on('trackerconnect', () => {
         warningCount--
+        this.status = 'Searching for online players...'
       })
     },
 
