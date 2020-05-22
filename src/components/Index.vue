@@ -3,10 +3,10 @@
     <br/>
     <div class='content'>
       <div class='columns'>
-        <div class='column has-text-right'>
+        <div class='column has-text-right starters'>
           <button class='button is-medium is-primary is-center' @click='newGame'>Host A New Game</button>
         </div>
-        <div class='column has-text-left'>
+        <div class='column has-text-left starters'>
           <router-link to='/find-players' class='button is-success is-medium'>Play With A Random Person</router-link>
         </div>
       </div>
@@ -78,5 +78,11 @@ export default {
 <style scoped>
 #gameCode {
   width: 50%;
+}
+
+@media screen and (max-width: 960px) {
+  .starters {
+    text-align: center !important;
+  }
 }
 </style>
