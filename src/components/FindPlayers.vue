@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class='container has-text-centered'>
-      <p>I'm gonna try finding players who are also looking for someone to play with :)</p>
+      <p class='content'>I'm gonna try finding players who are also looking for someone to play with :)</p>
       <p>{{ status }}</p>
     </div>
   </div>
@@ -47,6 +47,10 @@ export default {
 
               this.status = 'Found a player ! Handshaking...'
             }
+          }).catch((error) => {
+            this.status = 'Failed connecting to a player. Trying again...'
+
+            this.p2pt.requestMorePeers()
           })
       })
 
@@ -65,7 +69,7 @@ export default {
             // I will decide the game code
             this.startGame(peer)
             
-            this.status = 'Found a player ! Handshaking...'
+            this.status = 'Found a player ! Handshaking with sanitized hands...'
           }
         } else if (action === 'strt') {
           if (peer.id !== this.offer) return
@@ -87,11 +91,18 @@ export default {
 
       localStorage.setItem('gameCode', gameCode)
 
+      var failed = false
       setTimeout(() => {
+        if (failed) return
         this.$router.push('register')
       }, 1000)
 
-      this.p2pt.send(peer, 'strt-' + gameCode)
+      this.p2pt.send(peer, 'strt-' + gameCode).catch((error) => {
+        failed = true
+        this.status = 'Failed connecting to a player. Trying again...'
+
+        this.p2pt.requestMorePeers()
+      })
     }
   },
 
