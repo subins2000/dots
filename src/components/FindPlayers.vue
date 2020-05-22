@@ -3,6 +3,7 @@
     <div class='container has-text-centered'>
       <p class='content'>I'm gonna try finding players who are also looking for someone to play with :)</p>
       <p>{{ status }}</p>
+      <p>Found {{ count }} online players</p>
     </div>
   </div>
 </template>
@@ -18,7 +19,8 @@ export default {
   data () {
     return {
       offer: false,
-      status: 'Searching for online players...'
+      status: 'Searching for online players...',
+      count: 0
     }
   },
 
@@ -30,6 +32,7 @@ export default {
       var myDiceNumber = parseInt(Math.random().toString().substr(2, 5))
 
       this.p2pt.on('peerconnect', (peer) => {
+        this.count++
         this.p2pt
           .send(peer, 'play-' + myDiceNumber)
           .then(([peer, peerDiceNumber]) => {
@@ -83,6 +86,12 @@ export default {
           }
         }
       })
+
+      this.p2pt.on('trackerwarning', (error, stats) => {
+        if (stats.connected === 0) {
+          this.status = 'Have no connections to torrent trackers. Perhaps reload page or make sure WebTorrent trackers are not blocked by your ISP'
+        }
+      })
     },
 
     startGame (peer) {
@@ -96,10 +105,12 @@ export default {
         this.$router.push('register')
       }, 1000)
 
-      this.p2pt.send(peer, 'strt-' + gameCode).catch((error) => {
+      this.p2pt.send(
+        peer, 'strt-' + gameCode
+      ).catch((error) => {
         failed = true
         
-        this.status = 'Failed connecting to a player. Trying again...'
+        this.status = 'Failed connecting to a player. Trying again...\nA page refresh might help'
 
         this.offer = false
         this.p2pt.requestMorePeers()
