@@ -87,10 +87,16 @@ export default {
         }
       })
 
+      var warningCount = 0
       this.p2pt.on('trackerwarning', (error, stats) => {
-        if (stats.connected === 0) {
+        warningCount++
+        if (warningCount >= stats.total) {
           this.status = 'Have no connections to torrent trackers. Perhaps reload page or make sure WebTorrent trackers are not blocked by your ISP'
         }
+      })
+
+      this.p2pt.on('trackerconnect', () => {
+        warningCount--
       })
     },
 
