@@ -4,6 +4,11 @@
       <p class='content'>I'm gonna try finding players who are also looking for someone to play with :)</p>
       <p>{{ status }}</p>
       <p>Found {{ count }} online players</p>
+      <div class='is-hidden'>
+        <audio ref='foundPlayerAudio' async='async'>
+          <source src='static/box.ogg' type='audio/ogg'>
+        </audio>
+      </div>
     </div>
   </div>
 </template>
@@ -68,6 +73,8 @@ export default {
           peerDiceNumber = parseInt(peerDiceNumber)
           
           if (myDiceNumber > peerDiceNumber) {
+            this.$refs.foundPlayerAudio.play()
+
             // I will decide the game code
             this.startGame(peer)
             
@@ -76,6 +83,7 @@ export default {
         } else if (action === 'strt') {
           if (peer.id !== this.offer) return
 
+          this.$refs.foundPlayerAudio.play()
           this.status = 'Found a player ! Handshaking with sanitized hands...'
 
           let [blah, gameCode] = msg.split('-')
