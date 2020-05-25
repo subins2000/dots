@@ -75,6 +75,8 @@ const store = new Vuex.Store({
   }
 })
 
+store.commit('init')
+
 // Store in localstorage
 store.subscribe((mutation, state) => {
   // Store the state object as a JSON string
