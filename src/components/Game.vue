@@ -238,7 +238,10 @@ export default {
         this.myTurn = this.playerTurns.indexOf(true) == this.myID
 
         if (this.myTurn && this.gameHistoryIndex > 0 && this.gameHistory[this.gameHistoryIndex][0] != this.myID && this.chatIsOpen) {
-          this.chatAddMsg('!game!', 'It\'s your turn now !')
+          this.$buefy.toast.open({
+            message: 'It\'s your turn now !',
+            type: 'is-success'
+          })
         }
       }
     }
