@@ -13,10 +13,7 @@
           Copyleft {{ new Date().getFullYear() }}
         </div>
         <div class='level-item'>
-          <a href='https://github.com/subins2000/vett'>Source Code </a>&nbsp;
-        </div>
-         <div class='level-item'>
-          Made by&nbsp;<a href='https://subinsb.com/'>&nbsp;Subin Siby </a>&nbsp;and&nbsp;<a href='https://github.com/athul'>Athul Cyriac Ajay&nbsp;</a>
+          <router-link to='/about'>About Game</router-link>
         </div>
       </div>
     </nav>

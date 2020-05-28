@@ -23,7 +23,8 @@
     </form>
 
     <div class='content'>
-      <router-link to='/settings' class='button is-warning'>Game Settings</router-link>
+      <router-link to='/settings' class='button is-warning'>Game Settings</router-link>&nbsp;
+      <router-link to='/about' class='button is-warning'>Help</router-link>
     </div>
 
     <Footer/>
