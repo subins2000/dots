@@ -8,13 +8,17 @@
         <ul>
           <li>How many players can play ?</li>
           <p>There is <b>no limit</b> for the number of players who can join the game. If every player has a good internet connection, then it will work out fine.</p>
+          <li>What's P2P ?</li>
+          <p>Instead of a server managing the game and players, Vett uses Peer To Peer connections to run the game. This means you and your playmates connect to each other directly forming a mesh network and play together. Servers have very little role in this setup.</p>
+          <li>Privacy</li>
+          <p>No personal information about you, or identifiable information about you is shared with anyone. Only the name you type in will be shared to other players in the game.</p>
           <li>Why the name "Vett" ?</li>
           <p>The game is called "Poojyam <b>Vett</b>" in the language Malayalam.</p>
         </ul>
         <div class='has-text-centered'>
-          Made by&nbsp;<a href='https://twitter.com/SubinSiby'>&nbsp;Subin Siby </a>&nbsp;and&nbsp;<a href='https://github.com/athul'>Athul Cyriac Ajay&nbsp;</a><br/>
+          Made by&nbsp;<a href='https://twitter.com/SubinSiby'>Subin Siby</a>&nbsp;and&nbsp;<a href='https://github.com/athul'>Athul Cyriac Ajay</a><br/>
           <a href='https://github.com/subins2000/vett'>Source Code </a>&nbsp;
-        </div>
+        </div><br/><br/>
       </div>
     </div>
   </div>
