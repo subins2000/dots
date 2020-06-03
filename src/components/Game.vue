@@ -596,6 +596,15 @@ export default {
       line.classList.add('active')
       line.style.stroke = this.players[playerID].colors[0]
 
+      const latestLine = this.game.querySelector('.latest')
+      if (latestLine) {
+        latestLine.classList.remove('latest')
+      }
+
+      if (playerID !== this.myID) {
+        line.classList.add('latest')
+      }
+
       var lineType = line.classList.contains('hline') ? 'h' : 'v'
 
       if (historyIndex) {
@@ -643,6 +652,11 @@ export default {
 
             // All cells completed
             this.gameFinished = true
+
+            const latestLine = this.game.querySelector('.latest')
+            if (latestLine) {
+              latestLine.classList.remove('latest')
+            }
 
             var largestScore = 0
             var smallestScore = Infinity
@@ -1063,6 +1077,16 @@ svg text::selection {
 
 #game .line {
   stroke: #BBB;
+}
+
+#game .line.latest {
+  animation: blink-animation 1.5s infinite;
+}
+
+@keyframes blink-animation {
+  to {
+    stroke: #000
+  }
 }
 
 #game .cell, #game .line {
