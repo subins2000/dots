@@ -64,7 +64,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </div>
         <table class='table scoreboard content'>
           <tbody>
-            <tr v-for='(p, pid) in players' v-bind:style='"border: 3px dashed " + p.colors[0]' v-bind:key='pid' v-if='reRenderScoreboard'>
+            <tr v-for='(p, pid) in players' v-bind:style='"border: 3px dashed " + p.colors[0]' v-bind:class='playerTurns[pid] ? "turnnow" : ""' v-bind:key='pid' v-if='reRenderScoreboard'>
               <td>{{ p.name }}</td>
               <td>{{ p.score }}</td>
             </tr>
@@ -1095,5 +1095,10 @@ svg text::selection {
 
 .scoreboard {
   margin: 0 auto 10px;
+}
+
+.scoreboard .turnnow {
+  border-style: solid !important;
+  border-width: 5px !important;
 }
 </style>
