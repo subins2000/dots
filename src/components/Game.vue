@@ -389,6 +389,8 @@ export default {
           }
 
           $this.p2pt.send(peer, JSON.stringify(gameState))
+
+          this.updateScores()
         } else if (msg.type === 'gameRestore') {
           restoreGameData = msg
 
