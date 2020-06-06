@@ -7,7 +7,7 @@
         <h3>FAQ</h3>
         <ul>
           <li>How many players can play ?</li>
-          <p>There is <b>no limit</b> for the number of players who can join the game. If every player has a good internet connection, then it will work out fine.</p>
+          <p>There is <b>no limit</b> for the number of players who can join the game. If every player has a good internet connection, then it will work out fine. We recommend a max of 10 players</p>
           <li>I can't join the game!</li>
           <p>There are some unknown issues with some routers and internet service providers for making P2P connections to other players. Try changing your internet connection or browser or system</p>
           <li>What's P2P ?</li>

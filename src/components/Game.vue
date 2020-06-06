@@ -64,9 +64,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </div>
         <table class='table scoreboard content'>
           <tbody>
-            <tr v-for='(p, pid) in players' v-bind:style='"border: 3px dashed " + p.colors[0]' v-bind:class='playerTurns[pid] ? "turnnow" : ""' v-bind:key='pid' v-if='reRenderScoreboard'>
-              <td>{{ p.name }}</td>
-              <td>{{ p.score }}</td>
+            <tr v-for='pid in playerOrder' v-bind:style='"border: 3px dashed var(--playercolor-" + pid + ")"' v-bind:class='playerTurns[pid] ? "turnnow" : ""' v-bind:key='pid' v-if='reRenderScoreboard'>
+              <td>{{ players[pid].name }}</td>
+              <td><span class="score">{{ players[pid].score }}</span></td>
             </tr>
           </tbody>
         </table>
@@ -120,9 +120,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import * as d3 from 'd3'
 const P2PT = require('p2pt')
 
-var randomColor = () => {
+const randomColor = () => {
   return `hsla(${~~(360 * Math.random())},70%,50%,0.8)`
 }
+
+const playerColors = ['#23D160', '#209CEE', '#FFDD57', '#FF567B', '#FF16E6', '#6133DC', '#FF7E00', '#E9B96E', '#00D1B2', '#FF006C', '#BC00FF']
+const gameStyle = document.documentElement.style
 
 var gridSize = 6
 var cellWidth = 40
@@ -230,6 +233,16 @@ export default {
     }
   },
 
+  computed: {
+    /**
+     * Will have index => playerID
+     * To easily find position of playerID in a sorted numerical array
+     */
+    playerOrder () {
+      return Object.keys(this.players).sort()
+    }
+  },
+
   watch: {
     playerTurns: {
       deep: true,
@@ -292,9 +305,8 @@ export default {
           type: 'join',
           playerID: $this.myID,
           name: $this.myName,
-          colors: $this.players[$this.myID].colors,
           historyIndex: $this.gameHistoryIndex,
-          playerCount: Object.keys(this.players).length
+          playerCount: this.playerOrder.length
         }))
 
         $this.gameStatus = 'joined'
@@ -336,7 +348,6 @@ export default {
           $this.$set($this.players, msg.playerID, {
             conn: peer,
             name: msg.name,
-            colors: msg.colors,
             score: 0
           })
 
@@ -378,6 +389,8 @@ export default {
           }
 
           $this.p2pt.send(peer, JSON.stringify(gameState))
+
+          this.updateScores()
         } else if (msg.type === 'gameRestore') {
           restoreGameData = msg
 
@@ -394,11 +407,12 @@ export default {
         }
       })
     
-      var warningCount = 0
+      let warningCount = 0
+      let trackerConnected = false
       this.p2pt.on('trackerwarning', (error, stats) => {
         warningCount++
         
-        if (warningCount >= stats.total && stats.connected === 0) {
+        if (warningCount >= stats.total && !trackerConnected) {
           $this.status = 'Cannot connect to WebTorrent trackers'
 
           $this.$buefy.toast.open({
@@ -411,7 +425,7 @@ export default {
       })
 
       this.p2pt.on('trackerconnect', () => {
-        warningCount--
+        trackerConnected = true
       })
     },
 
@@ -594,7 +608,7 @@ export default {
       var audioToPlay = 'mark'
 
       line.classList.add('active')
-      line.style.stroke = this.players[playerID].colors[0]
+      line.style.stroke = `var(--playercolor-${playerID})`
 
       const latestLine = this.game.querySelector('.latest')
       if (latestLine) {
@@ -625,7 +639,7 @@ export default {
           
           box.classList.add('active')
           box.playerID = playerID
-          box.style.fill = this.players[playerID].colors[0]
+          box.style.fill = `var(--playercolor-${playerID})`
 
           this.boxLineHistory.push(lineType + line.id)
 
@@ -864,13 +878,9 @@ export default {
       }
       
       // Only restore if all online, active players info is obtained. Otherwise this.players object will be incomplete and activateLine() will fail
-      if (this.expectingPlayerCount > Object.keys(this.players).length) {
+      if (this.expectingPlayerCount > this.playerOrder.length) {
         this.p2pt.requestMorePeers()
         return false
-      }
-
-      if (restoreGameData.colors) {
-        this.players[this.myID].colors = restoreGameData.colors
       }
 
       this.restoreGameState(restoreGameData.gameHistory)
@@ -904,8 +914,14 @@ export default {
      * and change playerTurns array accordingly
      */
      fixPlayerTurns () {
-      for (var playerID in this.playerTurns) {
+      let i = 0
+      for (const playerID in this.playerTurns) {
         this.playerTurns[playerID] = false
+        
+        let color = playerColors[i] || randomColor()
+        // set style of player
+        gameStyle.setProperty('--playercolor-' + playerID, color)
+        i++
       }
 
       var nextPlayerID;
@@ -925,6 +941,7 @@ export default {
           /**
            * Get the playerID of the next player after the current player in array
            * indexOf() second param is startIndex
+           * Using `array.length - 1` will give last item's index
            */
           if (lastPlayerID === this.playerTurns.length - 1) {
             // Get first item in array
@@ -1095,6 +1112,17 @@ svg text::selection {
 
 .scoreboard {
   margin: 0 auto 10px;
+}
+
+.scoreboard tr {
+  display: inline-block;
+}
+
+.scoreboard .score {
+  border-radius: 10px;
+  padding: 5px 8px;
+  background: #000;
+  color: #fff
 }
 
 .scoreboard .turnnow {
