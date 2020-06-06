@@ -124,7 +124,7 @@ const randomColor = () => {
   return `hsla(${~~(360 * Math.random())},70%,50%,0.8)`
 }
 
-const playerColors = ['#23D160', '#209CEE', '#FFDD57', '#FF3864', '#7957D5', '#FF16E6', '#FF932A', '#E9B96E', '#00D1B2']
+const playerColors = ['#23D160', '#209CEE', '#FFDD57', '#FF567B', '#FF16E6', '#6133DC', '#FF7E00', '#E9B96E', '#00D1B2', '#FF006C', '#BC00FF']
 const gameStyle = document.documentElement.style
 
 var gridSize = 6
@@ -407,11 +407,12 @@ export default {
         }
       })
     
-      var warningCount = 0
+      let warningCount = 0
+      let trackerConnected = false
       this.p2pt.on('trackerwarning', (error, stats) => {
         warningCount++
         
-        if (warningCount >= stats.total && stats.connected === 0) {
+        if (warningCount >= stats.total && !trackerConnected) {
           $this.status = 'Cannot connect to WebTorrent trackers'
 
           $this.$buefy.toast.open({
@@ -424,7 +425,7 @@ export default {
       })
 
       this.p2pt.on('trackerconnect', () => {
-        warningCount--
+        trackerConnected = true
       })
     },
 
@@ -917,8 +918,9 @@ export default {
       for (const playerID in this.playerTurns) {
         this.playerTurns[playerID] = false
         
+        let color = playerColors[i] || randomColor()
         // set style of player
-        gameStyle.setProperty('--playercolor-' + playerID, playerColors[i])
+        gameStyle.setProperty('--playercolor-' + playerID, color)
         i++
       }
 
