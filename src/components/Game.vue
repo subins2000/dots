@@ -124,7 +124,7 @@ const randomColor = () => {
   return `hsla(${~~(360 * Math.random())},70%,50%,0.8)`
 }
 
-const playerColors = ['#23D160', '#209CEE', '']
+const playerColors = ['#23D160', '#209CEE', '#FFDD57', '#FF3864', '#7957D5', '#FF16E6', '#FF932A', '#E9B96E', '#00D1B2']
 const gameStyle = document.documentElement.style
 
 var gridSize = 6
