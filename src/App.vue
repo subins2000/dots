@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <GameTitle v-if='displayTitle' />
     <transition name='slide-fade'>
       <router-view/>
     </transition>
@@ -9,13 +8,7 @@
 
 <script>
 export default {
-  name: 'App',
-
-  computed: {
-    displayTitle () {
-      return this.$route.name === 'Index' || this.$route.name === 'Register' || this.$route.name === 'FindPlayers' || this.$route.name === 'Settings' || this.$route.name === 'About'
-    }
-  }
+  name: 'App'
 }
 </script>
 

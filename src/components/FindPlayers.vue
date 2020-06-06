@@ -1,5 +1,6 @@
 <template>
   <div>
+    <GameTitle />
     <div class='container has-text-centered'>
       <p class='content'>I'm gonna try finding players who are also looking for someone to play with :)</p>
       <p>{{ status }}</p>

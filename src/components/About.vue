@@ -1,5 +1,6 @@
 <template>
   <div>
+    <GameTitle />
     <div class='container'>
       <div class='content'>
         <h2>Dots And Boxes</h2>

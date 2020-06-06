@@ -1,5 +1,6 @@
 <template>
   <div>
+    <GameTitle />
     <div class='container has-text-centered'>
       <form @submit='playGame'>
         <div class='content'>

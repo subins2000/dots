@@ -1,7 +1,8 @@
 <template>
   <div>
+    <GameTitle />
     <div class='container'>
-      <form @submit='saveSettings'>
+      <form class='content' @submit='saveSettings'>
         <div class='field'>
           <label class='label'>Name</label>
           <div class='control'>
@@ -18,6 +19,8 @@
           <button class='button is-medium is-success is-center'>Save</button>
         </div>
       </form>
+
+      <Footer/>
     </div>
   </div>
 </template>
