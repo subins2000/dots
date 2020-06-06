@@ -5,7 +5,6 @@ import Vuex from 'vuex'
 import VueClipboard from 'vue-clipboard2'
 
 import Buefy from 'buefy'
-import 'buefy/dist/buefy.css'
 
 import Chat from 'vue-beautiful-chat'
 
