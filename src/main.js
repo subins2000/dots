@@ -35,7 +35,7 @@ Vue.directive('focus', {
 
 Vue.prototype.$GAME_CODE_LENGTH = 4
 Vue.prototype.$GAME_INVITE_LINK = 'https://vett.space/#/?g='
-Vue.prototype.$GAME_TURN_TIME = 5 // in seconds
+Vue.prototype.$GAME_TURN_TIME = 15 // in seconds
 
 var announceURLs = [
   'wss://tracker.openwebtorrent.com',

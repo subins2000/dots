@@ -65,7 +65,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
               <svg width='80' height='80' viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'>
                 <g>
                   <text x='50%' y='50%' dominant-baseline="middle" text-anchor="middle" font-size="80">{{ turnTimerCountdown }}</text>
-                  <circle id='countdown-circle' ref='countdownCircle' r='69.85699' cy='81' cx='81' stroke-width='8' stroke='#6fdb6f' fill='none' v-bind:stroke-dashoffset='turnTimerDashOffset' />
+                  <circle id='countdown-circle' ref='countdownCircle' r='69.85699' cy='81' cx='81' stroke-width='15' stroke='#6fdb6f' fill='none' v-bind:stroke-dashoffset='turnTimerDashOffset' />
                 </g>
               </svg>
             </div>
@@ -1164,6 +1164,7 @@ svg text::selection {
 
 .scoreboard tr {
   display: inline-block;
+  margin: 5px;
 }
 
 .scoreboard .score {
