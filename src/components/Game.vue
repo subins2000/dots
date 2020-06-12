@@ -1144,16 +1144,6 @@ svg text::selection {
   stroke: #BBB;
 }
 
-#game .line.latest {
-  animation: blink-animation 1.5s infinite;
-}
-
-@keyframes blink-animation {
-  to {
-    stroke: #000
-  }
-}
-
 #game .cell, #game .line {
   transition: 0.5s all;
 }
