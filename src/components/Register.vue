@@ -5,7 +5,7 @@
       <form @submit='playGame'>
         <div class='content'>
           <label class='label'>What is your name ?</label>
-          <input type='text' class='input' id='playerName' name='name' v-model='playerName' v-focus placeholder='Type your name here' />
+          <input type='text' class='input' id='playerName' name='name' v-model='playerName' ref='nameInput' placeholder='Type your name here' />
         </div>
         <div class='content'>
           <button class='button is-medium is-success is-center'>Join Game !</button>
@@ -51,6 +51,10 @@ export default {
   mounted () {
     if (!localStorage.getItem('gameCode') || localStorage.getItem('gameCode').length !== this.$GAME_CODE_LENGTH) {
       this.$router.push('/')
+    }
+
+    if (this.playerName === '') {
+      this.$refs.nameInput.focus()
     }
   }
 }
