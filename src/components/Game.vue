@@ -58,9 +58,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
           <span>Only start the game after everyone join.</span><br/>
           <span>Tap to draw line</span>
         </div>
-        <div class='content' v-if='!gameFinished'>
-          <span v-if='myTurn'>Your turn</span>
-          <span v-else>Waiting for opponent's move</span>
+        <div v-else-if='!gameFinished' class='content'>
+          <div class='columns is-mobile is-vcentered'>
+            <div class='column has-text-right'>
+              <!-- Thanks Turnip : https://stackoverflow.com/a/29650005/1372424 -->
+              <svg width='80' height='80' viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'>
+                <g>
+                  <text x='40' y='40'>{{ turnTimerCountdown }}</text>
+                  <circle id='countdown-circle' ref='countdownCircle' r='69.85699' cy='81' cx='81' stroke-width='8' stroke='#6fdb6f' fill='none' v-bind:stroke-dashoffset='turnTimerDashOffset' />
+                </g>
+              </svg>
+            </div>
+            <div class='column has-text-left'>
+              <span v-if='myTurn'>Your turn</span>
+              <span v-else>Waiting for opponent's move</span>
+            </div>
+          </div>
         </div>
         <table class='table scoreboard content'>
           <tbody>
@@ -131,6 +144,8 @@ var gridSize = 6
 var cellWidth = 40
 var cellMargin = 5
 
+let turnTimerFullOffset = 440
+
 /**
  * Storage for restoring gamestate if needed
  * Only used for players who need to restore game from other peers
@@ -141,8 +156,8 @@ export default {
   name: 'Game',
 
   p2pt: null,
-
   myID: '',
+  turnTimer: null,
 
   data () {
     return {
@@ -229,7 +244,10 @@ export default {
           bg: '#f4f7f9',
           text: '#565867'
         }
-      }
+      },
+
+      turnTimerCountdown: this.$GAME_TURN_TIME,
+      turnTimerDashOffset: turnTimerFullOffset
     }
   },
 
@@ -930,9 +948,9 @@ export default {
         // First player in list has the turn
         nextPlayerID = this.playerTurns.indexOf(false)
       } else {
-        var lastPlay = this.gameHistory[this.gameHistoryIndex]
-        var lastPlayerID = parseInt(lastPlay[0])
-        var lastPlayedLine = lastPlay[1] + lastPlay[2]
+        const lastPlay = this.gameHistory[this.gameHistoryIndex]
+        const lastPlayerID = parseInt(lastPlay[0])
+        const lastPlayedLine = lastPlay[1] + lastPlay[2]
 
         if (this.boxLineHistory.indexOf(lastPlayedLine) !== -1) {
           // The last played line made a box. So repeat turn
@@ -951,11 +969,41 @@ export default {
             nextPlayerID = this.playerTurns.indexOf(false, lastPlayerID + 1)
           }
         }
+
+        // Start timer
+        this.turnTimerCountdown = this.$GAME_TURN_TIME
+        this.turnTimerDashOffset = 0
+
+        clearInterval(this.turnTimer)
+
+        this.turnTimer = setInterval(this.turnEachSecond, 1000)
       }
 
       // Vue watch only gets triggered if changed with $set
       // https://vuejs.org/v2/guide/reactivity.html#For-Arrays
       this.$set(this.playerTurns, nextPlayerID, true)
+    },
+
+    turnEachSecond () {
+      this.turnTimerCountdown -= 1
+
+      this.turnTimerDashOffset = turnTimerFullOffset - (
+        (this.turnTimerCountdown / this.$GAME_TURN_TIME) * turnTimerFullOffset
+      )
+
+      if (this.turnTimerCountdown === 0) {
+        this.turnTimedOut()
+      }
+    },
+
+    // When the timer runs out
+    turnTimedOut () {
+      const curPlayerID = this.playerTurns.indexOf(true)
+
+      if (curPlayerID) {
+        this.gameHistory[++this.gameHistoryIndex] = [curPlayerID, '', '']
+        this.fixPlayerTurns()
+      }
     },
 
     /**
@@ -1128,5 +1176,13 @@ svg text::selection {
 .scoreboard .turnnow {
   border-style: solid !important;
   border-width: 5px !important;
+}
+
+.turninfobox .turninfo {
+  text-align: left;
+}
+
+#countdown-circle {
+  stroke-dasharray: 440; /* this value is the pixel circumference of the circle */
 }
 </style>
