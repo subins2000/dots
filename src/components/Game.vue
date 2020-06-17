@@ -295,7 +295,7 @@ export default {
       this.gameCode = localStorage.getItem('gameCode')
 
       if (!sessionStorage.getItem('myID')) {
-        sessionStorage.setItem('myID', parseInt(Math.random().toString().substr(2, 4)))
+        sessionStorage.setItem('myID', parseInt(Math.random().toString().substr(2, 6)))
         sessionStorage.setItem('myColor', randomColor())
       }
 
