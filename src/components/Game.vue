@@ -65,7 +65,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
               <svg width='80' height='80' viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'>
                 <g>
                   <text x='50%' y='50%' dominant-baseline="middle" text-anchor="middle" font-size="80">{{ turnTimerCountdown }}</text>
-                  <circle id='countdown-circle' ref='countdownCircle' r='69.85699' cy='81' cx='81' stroke-width='15' stroke='#6fdb6f' fill='none' v-bind:stroke-dashoffset='turnTimerDashOffset' />
+                  <circle id='countdown-circle' ref='countdownCircle' r='69.85699' cy='81' cx='81' stroke-width='15' v-bind:stroke='"var(--playercolor-" + curPlayerID + ")"' fill='none' v-bind:stroke-dashoffset='turnTimerDashOffset' />
                 </g>
               </svg>
             </div>
@@ -164,11 +164,13 @@ export default {
       status: 'Waiting for players...',
       myName: this.$store.state.name,
 
+      curPlayerID: null,
       myTurn: false,
+
       gameCode: 'ckO2',
       gameFinished: false,
       gameStatus: 'playerwait',
-      audio: ['box', 'mark', 'end'],
+      audio: ['box', 'mark', 'end', 'timer'],
 
       players: {},
 
@@ -266,7 +268,8 @@ export default {
       deep: true,
       
       handler () {
-        this.myTurn = this.playerTurns.indexOf(true) == this.myID
+        this.curPlayerID = this.playerTurns.indexOf(true)
+        this.myTurn = this.curPlayerID == this.myID
 
         if (this.myTurn && this.gameHistoryIndex > 0 && this.gameHistory[this.gameHistoryIndex][0] != this.myID && this.chatIsOpen) {
           this.$buefy.toast.open({
@@ -974,6 +977,9 @@ export default {
         this.turnTimerCountdown = this.$GAME_TURN_TIME
         this.turnTimerDashOffset = 0
 
+        const timerAudio = this.$refs['audio-timer'][0]
+        timerAudio.pause()
+        timerAudio.currentTime = 0
         clearInterval(this.turnTimer)
 
         this.turnTimer = setInterval(this.turnEachSecond, 1000)
@@ -991,6 +997,10 @@ export default {
         (this.turnTimerCountdown / this.$GAME_TURN_TIME) * turnTimerFullOffset
       )
 
+      if (this.turnTimerCountdown === 5) {
+        this.playAudio('timer')
+      }
+
       if (this.turnTimerCountdown === 0) {
         this.turnTimedOut()
       }
@@ -998,10 +1008,8 @@ export default {
 
     // When the timer runs out
     turnTimedOut () {
-      const curPlayerID = this.playerTurns.indexOf(true)
-
-      if (curPlayerID) {
-        this.gameHistory[++this.gameHistoryIndex] = [curPlayerID, '', '']
+      if (this.curPlayerID) {
+        this.gameHistory[++this.gameHistoryIndex] = [this.curPlayerID, '', '']
         this.fixPlayerTurns()
       }
     },
