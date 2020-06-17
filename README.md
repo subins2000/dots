@@ -23,3 +23,5 @@ Trackers list is included in `src/components/Game.vue`. You may want to change t
   * [tmkappelt](https://freesound.org/people/tmkappelt/sounds/85702/) - CC0 license
   * [shinephoenixstormcrow](https://freesound.org/people/shinephoenixstormcrow/sounds/337049/) - CC-BY license
   * [LittleRobotSoundFactory](https://freesound.org/people/LittleRobotSoundFactory/sounds/270404/) - CC-BY license
+  * [Leszek_Szary](https://freesound.org/people/Leszek_Szary/sounds/146735/) - CC0 license
+* [vue-beautiful-chat](https://github.com/mattmezza/vue-beautiful-chat)
