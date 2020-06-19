@@ -687,6 +687,7 @@ export default {
 
             // All cells completed
             this.gameFinished = true
+            this.stopTimer()
 
             const latestLine = this.game.querySelector('.latest')
             if (latestLine) {
@@ -973,16 +974,15 @@ export default {
           }
         }
 
-        // Start timer
-        this.turnTimerCountdown = this.$GAME_TURN_TIME
-        this.turnTimerDashOffset = 0
+        if (!this.gameFinished) {
+          // Start timer
+          this.turnTimerCountdown = this.$GAME_TURN_TIME
+          this.turnTimerDashOffset = 0
 
-        const timerAudio = this.$refs['audio-timer'][0]
-        timerAudio.pause()
-        timerAudio.currentTime = 0
-        clearInterval(this.turnTimer)
+          this.stopTimer()
 
-        this.turnTimer = setInterval(this.turnEachSecond, 1000)
+          this.turnTimer = setInterval(this.turnEachSecond, 1000)
+        }
       }
 
       // Vue watch only gets triggered if changed with $set
@@ -1012,6 +1012,14 @@ export default {
         this.gameHistory[++this.gameHistoryIndex] = [this.curPlayerID, '', '']
         this.fixPlayerTurns()
       }
+    },
+
+    stopTimer () {
+      clearInterval(this.turnTimer)
+
+      const timerAudio = this.$refs['audio-timer'][0]
+      timerAudio.pause()
+      timerAudio.currentTime = 0
     },
 
     /**
