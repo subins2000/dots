@@ -455,6 +455,44 @@ export default {
       var game = this.svg.append('g')
         .attr('transform', 'translate(10, 10)')
 
+      const addLine = (cell, type, id, x1, y1, x2, y2) => {
+        const lineG = cell.append('g')
+
+        lineG.append('line')
+          .attr('class', `line ${type}line`)
+          .attr('x1', x1)
+          .attr('y1', y1)
+          .attr('x2', x2)
+          .attr('y2', y2)
+          .attr('stroke-width', cellMargin)
+          .attr('stroke-linecap', 'round')
+          .attr('id', id)
+
+        // Add a path for easy click
+
+        let lineArea = ''
+        const midPoint = cellWidth / 2.8284 // cellWidth / (2*sqrt(2))
+        if (type === 'v') {
+          lineArea = `M${x1},${y1}` +
+                    'l' + midPoint + ',' + midPoint +
+                    `L${x2},${y2}` +
+                    'l-' + midPoint + ',-' + midPoint + 'Z'
+        } else {
+          lineArea = `M${x1},${y1}` +
+                      'l' + midPoint + ',' + midPoint +
+                      `L${x2},${y2}` +
+                      'l-' + midPoint + ',-' + midPoint + 'Z'
+        }
+
+        lineG.append('path')
+          .attr('class', 'lineArea')
+          // .attr('stroke', 'blue')
+          // .attr('fill', 'blue')
+          .attr('stroke-width', 1)
+          .attr('opacity', '0')
+          .attr('d', lineArea)
+      }
+
       var row, cell
       for (var i = 0; i < gridSize; i++) {
         // Make grid
@@ -480,43 +518,19 @@ export default {
             .attr('id', i + '-' + j)
 
           // Add lines
-          cell.append('line')
-            .attr('class', 'line vline')
-            .attr('y1', cellMargin)
-            .attr('y2', cellWidth - cellMargin)
-            .attr('x1', 0)
-            .attr('x2', 0)
-            .attr('stroke-width', cellMargin)
-            .attr('stroke-linecap', 'round')
-            .attr('id', i + '-' + j)
-
-          cell.append('line')
-            .attr('class', 'line hline')
-            .attr('x1', cellMargin)
-            .attr('x2', cellWidth - cellMargin)
-            .attr('y1', 0)
-            .attr('y2', 0)
-            .attr('stroke-width', cellMargin)
-            .attr('stroke-linecap', 'round')
-            .attr('id', i + '-' + j)
+          addLine(cell, 'v', i + '-' + j, 0, cellMargin, 0, cellWidth - cellMargin)
+          addLine(cell, 'h', i + '-' + j, cellMargin, 0, cellWidth - cellMargin, 0)
           
           cell.append('circle')
             .attr('class', 'dot')
+            // .attr('opacity', '0')
             .attr('cx', 0)
             .attr('cy', 0)
             .attr('r', cellMargin)
 
           // Add horizontal line below last row elems
           if (i == gridSize - 1) {
-            cell.append('line')
-              .attr('class', 'line hline')
-              .attr('x1', cellMargin)
-              .attr('x2', cellWidth - cellMargin)
-              .attr('y1', cellWidth)
-              .attr('y2', cellWidth)
-              .attr('stroke-width', cellMargin)
-              .attr('stroke-linecap', 'round')
-              .attr('id', (i + 1) + '-' + j)
+            addLine(cell, 'h', (i + 1) + '-' + j, cellMargin, cellWidth, cellWidth - cellMargin, cellWidth)
 
             cell.append('circle')
               .attr('class', 'dot')
@@ -527,15 +541,7 @@ export default {
 
           // Add vertical line on right of last column elems
           if (j == gridSize - 1) {
-            cell.append('line')
-              .attr('class', 'line vline')
-              .attr('y1', cellMargin)
-              .attr('y2', cellWidth - cellMargin)
-              .attr('x1', cellWidth)
-              .attr('x2', cellWidth)
-              .attr('stroke-width', cellMargin)
-              .attr('stroke-linecap', 'round')
-              .attr('id', i + '-' + (j + 1))
+            addLine(cell, 'v', i + '-' + (j + 1), cellWidth, cellMargin, cellWidth, cellWidth - cellMargin)
 
             cell.append('circle')
               .attr('class', 'dot')
@@ -555,12 +561,15 @@ export default {
 
       // Add events
       const $this = this
-      this.game.querySelectorAll('.line').forEach((elem) => {
-        elem.addEventListener('click', $this.onLineClick)
+      this.game.querySelectorAll('.lineArea').forEach((elem) => {
+        elem.addEventListener('click', (e) => {
+          // previous sibling is .line
+          $this.onLineClick(e.target.previousSibling)
+        })
       })
     },
 
-    onLineClick (e) {
+    onLineClick (lineElem) {
       if (this.gameStatus === 'close' && this.playerTurns.length === 1) {
         this.$buefy.toast.open({
           message: 'Connection lost. Retrying...',
@@ -605,20 +614,18 @@ export default {
         return false
       }
 
-      var elem = e.target
-
-      if (!this.myTurn || elem.classList.contains('active')) {
+      if (!this.myTurn || lineElem.classList.contains('active')) {
         return false
       }
 
       this.sendToAll({
         type: 'move',
         playerID: this.myID,
-        line: elem.classList.contains('hline') ? 'h' : 'v',
-        move: elem.id
+        line: lineElem.classList.contains('hline') ? 'h' : 'v',
+        move: lineElem.id
       })
 
-      this.activateLine(elem, this.myID)
+      this.activateLine(lineElem, this.myID)
     },
 
     activateLine (line, playerID, playAudio = true, historyIndex = false) {
