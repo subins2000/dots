@@ -37,6 +37,30 @@ Vue.prototype.$GAME_CODE_LENGTH = 4
 Vue.prototype.$GAME_INVITE_LINK = 'https://vett.space/#/?g='
 Vue.prototype.$GAME_TURN_TIME = 15 // in seconds
 
+Vue.prototype.isGameCodeValid = (gameCode) => {
+  try {
+    const [gridSize, gameID] = gameCode.split('.')
+
+    if (gameID.length !== Vue.prototype.$GAME_CODE_LENGTH) {
+      return false
+    }
+
+    let [x, y] = gridSize.split('x')
+
+    x = parseInt(x)
+    y = parseInt(y)
+
+    if (x < 2 || y < 2) {
+      return false
+    }
+
+    return true
+  } catch (e) {
+    console.log(e)
+    return false
+  }
+}
+
 var announceURLs = [
   'wss://tracker.openwebtorrent.com',
   'wss://tracker.sloppyta.co:443/announce',

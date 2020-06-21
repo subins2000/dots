@@ -6,7 +6,7 @@
       <div class='content'>
         <div class='columns'>
           <div class='column has-text-right starters'>
-            <button class='button is-medium is-primary is-center' @click='newGame'>Host A New Game</button>
+            <router-link to='/new' class='button is-medium is-primary is-center'>Host A New Game</router-link>
           </div>
           <div class='column has-text-left starters'>
             <router-link to='/find-players' class='button is-success is-medium'>Play With A Random Person</router-link>
@@ -45,19 +45,10 @@ export default {
   },
 
   methods: {
-    newGame () {
-      this.$router.push('register')
-
-      var gameCode = Math.random().toString(36).substr(2, this.$GAME_CODE_LENGTH)
-
-      localStorage.setItem('gameCreator', true)
-      localStorage.setItem('gameCode', gameCode)
-    },
-
     joinGame (e) {
       e.preventDefault()
 
-      if (this.gameCode.length !== this.$GAME_CODE_LENGTH) {
+      if (!this.isGameCodeValid(this.gameCode)) {
         this.$buefy.toast.open('Please enter valid Game Code')
       } else {
         localStorage.setItem('gameCode', this.gameCode)

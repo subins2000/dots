@@ -25,9 +25,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <nav class='level is-mobile'>
           <div class='level-left'>
             <span class='level-item'>
-              <router-link to='/' class='button'>Vett !</router-link>
+              <router-link to='/' class='has-text-white is-size-4'>Vett !</router-link>
               &nbsp;&nbsp;
-              <span class='has-text-weight-bold' title='Game Code'>{{ gameCode }}</span>
+              <span class='button is-small has-text-weight-bold' title='Game Code. Click to copy' v-clipboard='gameCode' @click='copyGameCode'>{{ gameCode }}</span>
             </span>
           </div>
           <span class='level-item has-text-centered'>{{ status }}</span>
@@ -140,7 +140,7 @@ const randomColor = () => {
 const playerColors = ['#23D160', '#209CEE', '#FFDD57', '#FF567B', '#FF16E6', '#6133DC', '#FF7E00', '#E9B96E', '#00D1B2', '#FF006C', '#BC00FF']
 const gameStyle = document.documentElement.style
 
-var gridSize = 6
+var gridSize = [6, 6]
 var cellWidth = 40
 var cellMargin = 5
 
@@ -283,16 +283,17 @@ export default {
 
   methods: {
     init () {
-      if (!localStorage.getItem('gameCode') || localStorage.getItem('gameCode').length !== this.$GAME_CODE_LENGTH) {
+      if (!this.isGameCodeValid(localStorage.getItem('gameCode'))) {
         this.$router.push('/')
         return
       }
+      this.gameCode = localStorage.getItem('gameCode')
 
       this.game = this.$refs.game
       this.svg = d3.select(this.$refs.game)
-      this.makeGameBoard()
 
-      this.gameCode = localStorage.getItem('gameCode')
+      gridSize = this.gameCode.split('.')[0].split('x')
+      this.makeGameBoard()
 
       if (!sessionStorage.getItem('myID')) {
         sessionStorage.setItem('myID', parseInt(Math.random().toString().substr(2, 6)))
@@ -451,9 +452,15 @@ export default {
     },
 
     makeGameBoard () {
+      const canvasSize = [
+        (cellWidth) * gridSize[0] + cellMargin * 2 + 7,
+        (cellWidth) * gridSize[1] + cellMargin * 2 + 7
+      ]
+      this.svg.attr('viewBox', `0 0 ${canvasSize[1]} ${canvasSize[0]}`)
+
       // Add a bit margin
       var game = this.svg.append('g')
-        .attr('transform', 'translate(10, 10)')
+        .attr('transform', `translate(${cellMargin + 5}, ${cellMargin + 5})`)
 
       const addLine = (cell, type, id, x1, y1, x2, y2) => {
         const lineG = cell.append('g')
@@ -468,11 +475,11 @@ export default {
           .attr('stroke-linecap', 'round')
           .attr('id', id)
 
-        // Add a path for easy click
-
+        // Add a traingular area for easy click on line
         let lineArea = ''
-        const midPoint = cellWidth / 2.8284 // cellWidth / (2*sqrt(2))
+        const midPoint = cellWidth / 2.8284 // (cellWidth/2) / sin(45)
         if (type === 'v') {
+          // l is relative, L & M is absolute
           lineArea = `M${x1},${y1}` +
                     'l' + midPoint + ',' + midPoint +
                     `L${x2},${y2}` +
@@ -494,14 +501,15 @@ export default {
       }
 
       var row, cell
-      for (var i = 0; i < gridSize; i++) {
+      for (var i = 0; i < gridSize[0]; i++) {
         // Make grid
         row = game.append('g')
           .attr('class', 'row')
           .attr('transform', () => {
             return 'translate(0, ' + cellWidth * i + ')'
           })
-        for (var j = 0; j < gridSize; j++) {
+
+        for (var j = 0; j < gridSize[1]; j++) {
           cell = row.append('g')
             .attr('class', 'col')
             .attr('transform', () => {
@@ -513,8 +521,8 @@ export default {
             .attr('class', 'cell')
             .attr('width', cellWidth)
             .attr('height', cellWidth)
-            .attr('x', cellMargin - 3)
-            .attr('y', cellMargin - 3)
+            .attr('x', 0)
+            .attr('y', 0)
             .attr('id', i + '-' + j)
 
           // Add lines
@@ -529,7 +537,7 @@ export default {
             .attr('r', cellMargin)
 
           // Add horizontal line below last row elems
-          if (i == gridSize - 1) {
+          if (i == gridSize[0] - 1) {
             addLine(cell, 'h', (i + 1) + '-' + j, cellMargin, cellWidth, cellWidth - cellMargin, cellWidth)
 
             cell.append('circle')
@@ -540,7 +548,7 @@ export default {
           }
 
           // Add vertical line on right of last column elems
-          if (j == gridSize - 1) {
+          if (j == gridSize[1] - 1) {
             addLine(cell, 'v', i + '-' + (j + 1), cellWidth, cellMargin, cellWidth, cellWidth - cellMargin)
 
             cell.append('circle')
@@ -758,7 +766,7 @@ export default {
             this.game.querySelector('.hline[id="' + (row - 1) + '-' + col + '"]')
           )
 
-          if (col + 1 <= gridSize) {
+          if (col + 1 <= gridSize[1]) {
             lines.push(
               this.game.querySelector('.vline[id="' + ((row - 1) + '-' + (col + 1)) + '"]')
             )
@@ -767,7 +775,7 @@ export default {
           consideringBoxes[((row - 1) + '-' + col)] = false
         }
 
-        if (row + 1 <= gridSize) {
+        if (row + 1 <= gridSize[0]) {
           lines.push(
             this.game.querySelector('.vline[id="' + (row + '-' + col) + '"]')
           )
@@ -775,7 +783,7 @@ export default {
             this.game.querySelector('.hline[id="' + ((row + 1) + '-' + col) + '"]')
           ) // Cause row'th one is the activeLine
 
-          if (col + 1 <= gridSize) {
+          if (col + 1 <= gridSize[1]) {
             lines.push(
               this.game.querySelector('.vline[id="' + (row + '-' + (col + 1)) + '"]')
             )
@@ -795,7 +803,7 @@ export default {
             this.game.querySelector('.hline[id="' + row + '-' + (col - 1) + '"]')
           )
 
-          if (row + 1 <= gridSize) {
+          if (row + 1 <= gridSize[0]) {
             lines.push(
               this.game.querySelector('.hline[id="' + ((row + 1) + '-' + (col - 1)) + '"]')
             )
@@ -804,7 +812,7 @@ export default {
           consideringBoxes[(row + '-' + (col - 1))] = false
         }
 
-        if (col + 1 <= gridSize) {
+        if (col + 1 <= gridSize[1]) {
           lines.push(
             this.game.querySelector('.vline[id="' + (row + '-' + (col + 1)) + '"]')
           ) // Cause col'th one is the activeLine
@@ -812,7 +820,7 @@ export default {
             this.game.querySelector('.hline[id="' + (row + '-' + col) + '"]')
           )
 
-          if (row + 1 <= gridSize) {
+          if (row + 1 <= gridSize[0]) {
             lines.push(
               this.game.querySelector('.hline[id="' + ((row + 1) + '-' + col) + '"]')
             )
@@ -1141,6 +1149,7 @@ export default {
     if (this.onBeforeUnload()) {
       next(false)
     } else {
+      this.stopTimer()
       next(true)
     }
   }
@@ -1159,13 +1168,11 @@ export default {
 }
 
 #game-wrapper {
-  height: 60vh;
   margin: 20px auto 10px;
 }
 
 #game {
-  width: 97%;
-  height: 100%;
+  max-height: 70vh;
 }
 
 svg {
@@ -1223,5 +1230,17 @@ svg text::selection {
 
 #countdown-circle {
   stroke-dasharray: 440; /* this value is the pixel circumference of the circle */
+}
+
+@media screen and (max-width: 700px) {
+  #header {
+    padding: 0;
+  }
+  #header .container {
+    padding: 15px 10px;
+  }
+  #game-wrapper {
+    margin-bottom: 0;
+  }
 }
 </style>
