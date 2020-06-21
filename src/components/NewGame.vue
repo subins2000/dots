@@ -4,7 +4,7 @@
     <div class='container has-text-centered'>
       <form @submit='startGame'>
         <div class='content'>
-          <p>Choose the grid size (rows x columns)</p>
+          <p>Choose a grid size (rows x columns) :</p>
           <div class='gridSizes'>
             <div class='gridSize' v-for='size in gridSizes'>
               <b-radio-button v-model='gridSize'
@@ -34,7 +34,7 @@ export default {
   name: 'NewGame',
   data () {
     return {
-      gridSize: '',
+      gridSize: '6x6',
       gridSizes: [
         '3x8',
         '4x4',
