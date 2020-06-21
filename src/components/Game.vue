@@ -27,7 +27,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <span class='level-item'>
               <router-link to='/' class='has-text-white is-size-4'>Vett !</router-link>
               &nbsp;&nbsp;
-              <span class='button is-small has-text-weight-bold' title='Game Code. Click to copy' v-clipboard='gameCode'>{{ gameCode }}</span>
+              <span class='button is-small has-text-weight-bold' title='Game Code. Click to copy' v-clipboard='gameCode' @click='copyGameCode'>{{ gameCode }}</span>
             </span>
           </div>
           <span class='level-item has-text-centered'>{{ status }}</span>
