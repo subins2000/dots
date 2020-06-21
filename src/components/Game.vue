@@ -886,9 +886,12 @@ export default {
     },
 
     restoreGameState (history) {
-      var h
-      for (var historyIndex in history) {
-        h = history[historyIndex] // [playerID, lineType, lineID]
+      for (let historyIndex in history) {
+        let h = history[historyIndex] // [playerID, lineType, lineID]
+
+        if (h[1] === '') {
+          this.gameHistory[historyIndex] = [h[0], '', '']
+        }
 
         if ((h[1] !== 'h' && h[1] !== 'v') || h[2].length !== 3) {
           continue
@@ -896,6 +899,7 @@ export default {
 
         this.activateLine(this.game.querySelector('.' + h[1] + 'line[id="' + h[2] + '"]'), h[0], false, historyIndex)
       }
+      this.updateScores()
     },
 
     /**
@@ -920,12 +924,13 @@ export default {
       this.expectingPlayerCount = 0
     },
 
+    // Recalculate scores
     updateScores () {
-      var markedBoxes = Array.from(this.game.getElementsByClassName('cell active'))
+      let markedBoxes = Array.from(this.game.getElementsByClassName('cell active'))
 
-      var playerScores = []
+      let playerScores = []
 
-      for (var playerID in this.playerTurns) {
+      for (let playerID in this.playerTurns) {
         playerScores[playerID] = 0
       }
 
@@ -933,7 +938,17 @@ export default {
         playerScores[e.playerID]++
       })
 
-      for (var playerID in playerScores) {
+      // Subtract scores from turn timeouts
+      for (let historyIndex in this.gameHistory) {
+        let h = this.gameHistory[historyIndex] // [playerID, lineType, lineID]
+
+        // If the turn caused a timeout, lineType will be null string
+        if (h[1] === '') {
+          playerScores[h[0]]--
+        }
+      }
+
+      for (let playerID in playerScores) {
         this.players[playerID].score = playerScores[playerID]
       }
     },
@@ -1017,6 +1032,16 @@ export default {
     turnTimedOut () {
       if (this.curPlayerID) {
         this.gameHistory[++this.gameHistoryIndex] = [this.curPlayerID, '', '']
+
+        this.$set(this.players[this.curPlayerID], 'score', this.players[this.curPlayerID].score - 1)
+
+        this.$buefy.toast.open({
+          message: 'Time ran out : -1 point',
+          position: 'is-top',
+          type: 'is-warning',
+          duration: 3000
+        })
+
         this.fixPlayerTurns()
       }
     },
