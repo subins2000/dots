@@ -49,7 +49,7 @@ export default {
   },
 
   mounted () {
-    if (!localStorage.getItem('gameCode') || localStorage.getItem('gameCode').length !== this.$GAME_CODE_LENGTH) {
+    if (!this.isGameCodeValid(localStorage.getItem('gameCode'))) {
       this.$router.push('/')
     }
 

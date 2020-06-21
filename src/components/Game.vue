@@ -140,7 +140,7 @@ const randomColor = () => {
 const playerColors = ['#23D160', '#209CEE', '#FFDD57', '#FF567B', '#FF16E6', '#6133DC', '#FF7E00', '#E9B96E', '#00D1B2', '#FF006C', '#BC00FF']
 const gameStyle = document.documentElement.style
 
-var gridSize = 8
+var gridSize = [6, 6]
 var cellWidth = 40
 var cellMargin = 5
 
@@ -283,16 +283,17 @@ export default {
 
   methods: {
     init () {
-      if (!localStorage.getItem('gameCode') || localStorage.getItem('gameCode').length !== this.$GAME_CODE_LENGTH) {
+      if (!this.isGameCodeValid(localStorage.getItem('gameCode'))) {
         this.$router.push('/')
         return
       }
+      this.gameCode = localStorage.getItem('gameCode')
 
       this.game = this.$refs.game
       this.svg = d3.select(this.$refs.game)
-      this.makeGameBoard()
 
-      this.gameCode = localStorage.getItem('gameCode')
+      gridSize = this.gameCode.split('.')[0].split('x')
+      this.makeGameBoard()
 
       if (!sessionStorage.getItem('myID')) {
         sessionStorage.setItem('myID', parseInt(Math.random().toString().substr(2, 6)))
@@ -452,17 +453,10 @@ export default {
 
     makeGameBoard () {
       const canvasSize = [
-        (cellWidth) * gridSize + cellMargin * 2 + 7,
-        (cellWidth) * gridSize + cellMargin * 2 + 7
+        (cellWidth) * gridSize[0] + cellMargin * 2 + 7,
+        (cellWidth) * gridSize[1] + cellMargin * 2 + 7
       ]
-      this.svg.attr('viewBox', `0 0 ${canvasSize[0]} ${canvasSize[1]}`)
-
-      this.svg.append('line')
-          .attr('class', `line`)
-          .attr('x1', 0)
-          .attr('y1', 0)
-          .attr('x2', canvasSize[0])
-          .attr('y2', canvasSize[1])
+      this.svg.attr('viewBox', `0 0 ${canvasSize[1]} ${canvasSize[0]}`)
 
       // Add a bit margin
       var game = this.svg.append('g')
@@ -507,7 +501,7 @@ export default {
       }
 
       var row, cell
-      for (var i = 0; i < gridSize; i++) {
+      for (var i = 0; i < gridSize[0]; i++) {
         // Make grid
         row = game.append('g')
           .attr('class', 'row')
@@ -515,7 +509,7 @@ export default {
             return 'translate(0, ' + cellWidth * i + ')'
           })
 
-        for (var j = 0; j < gridSize; j++) {
+        for (var j = 0; j < gridSize[1]; j++) {
           cell = row.append('g')
             .attr('class', 'col')
             .attr('transform', () => {
@@ -543,7 +537,7 @@ export default {
             .attr('r', cellMargin)
 
           // Add horizontal line below last row elems
-          if (i == gridSize - 1) {
+          if (i == gridSize[0] - 1) {
             addLine(cell, 'h', (i + 1) + '-' + j, cellMargin, cellWidth, cellWidth - cellMargin, cellWidth)
 
             cell.append('circle')
@@ -554,7 +548,7 @@ export default {
           }
 
           // Add vertical line on right of last column elems
-          if (j == gridSize - 1) {
+          if (j == gridSize[1] - 1) {
             addLine(cell, 'v', i + '-' + (j + 1), cellWidth, cellMargin, cellWidth, cellWidth - cellMargin)
 
             cell.append('circle')
@@ -772,7 +766,7 @@ export default {
             this.game.querySelector('.hline[id="' + (row - 1) + '-' + col + '"]')
           )
 
-          if (col + 1 <= gridSize) {
+          if (col + 1 <= gridSize[1]) {
             lines.push(
               this.game.querySelector('.vline[id="' + ((row - 1) + '-' + (col + 1)) + '"]')
             )
@@ -781,7 +775,7 @@ export default {
           consideringBoxes[((row - 1) + '-' + col)] = false
         }
 
-        if (row + 1 <= gridSize) {
+        if (row + 1 <= gridSize[0]) {
           lines.push(
             this.game.querySelector('.vline[id="' + (row + '-' + col) + '"]')
           )
@@ -789,7 +783,7 @@ export default {
             this.game.querySelector('.hline[id="' + ((row + 1) + '-' + col) + '"]')
           ) // Cause row'th one is the activeLine
 
-          if (col + 1 <= gridSize) {
+          if (col + 1 <= gridSize[1]) {
             lines.push(
               this.game.querySelector('.vline[id="' + (row + '-' + (col + 1)) + '"]')
             )
@@ -809,7 +803,7 @@ export default {
             this.game.querySelector('.hline[id="' + row + '-' + (col - 1) + '"]')
           )
 
-          if (row + 1 <= gridSize) {
+          if (row + 1 <= gridSize[0]) {
             lines.push(
               this.game.querySelector('.hline[id="' + ((row + 1) + '-' + (col - 1)) + '"]')
             )
@@ -818,7 +812,7 @@ export default {
           consideringBoxes[(row + '-' + (col - 1))] = false
         }
 
-        if (col + 1 <= gridSize) {
+        if (col + 1 <= gridSize[1]) {
           lines.push(
             this.game.querySelector('.vline[id="' + (row + '-' + (col + 1)) + '"]')
           ) // Cause col'th one is the activeLine
@@ -826,7 +820,7 @@ export default {
             this.game.querySelector('.hline[id="' + (row + '-' + col) + '"]')
           )
 
-          if (row + 1 <= gridSize) {
+          if (row + 1 <= gridSize[0]) {
             lines.push(
               this.game.querySelector('.hline[id="' + ((row + 1) + '-' + col) + '"]')
             )

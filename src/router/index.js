@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Index from '@/components/Index'
+import NewGame from '@/components/NewGame'
 import Register from '@/components/Register'
 import Game from '@/components/Game'
 import Settings from '@/components/Settings'
@@ -15,6 +16,11 @@ export default new Router({
       path: '/',
       name: 'Index',
       component: Index
+    },
+    {
+      path: '/new',
+      name: 'NewGame',
+      component: NewGame
     },
     {
       path: '/register',
