@@ -1149,6 +1149,7 @@ export default {
     if (this.onBeforeUnload()) {
       next(false)
     } else {
+      this.stopTimer()
       next(true)
     }
   }

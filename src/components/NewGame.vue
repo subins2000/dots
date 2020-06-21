@@ -39,8 +39,8 @@ export default {
         '3x8',
         '4x4',
         '6x6',
-        '10x10',
-        '15x15'
+        '8x8',
+        '10x10'
       ],
       customSizeX: 0,
       customSizeY: 0

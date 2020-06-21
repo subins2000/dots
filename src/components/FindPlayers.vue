@@ -111,7 +111,7 @@ export default {
     },
 
     startGame (peer) {
-      let gameCode = Math.random().toString(36).substr(2, this.$GAME_CODE_LENGTH)
+      let gameCode = '6x6.' + Math.random().toString(36).substr(2, this.$GAME_CODE_LENGTH)
 
       localStorage.setItem('gameCode', gameCode)
 
