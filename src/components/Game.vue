@@ -140,7 +140,7 @@ const randomColor = () => {
 const playerColors = ['#23D160', '#209CEE', '#FFDD57', '#FF567B', '#FF16E6', '#6133DC', '#FF7E00', '#E9B96E', '#00D1B2', '#FF006C', '#BC00FF']
 const gameStyle = document.documentElement.style
 
-var gridSize = 6
+var gridSize = 8
 var cellWidth = 40
 var cellMargin = 5
 
@@ -451,9 +451,22 @@ export default {
     },
 
     makeGameBoard () {
+      const canvasSize = [
+        (cellWidth) * gridSize + cellMargin * 2 + 7,
+        (cellWidth) * gridSize + cellMargin * 2 + 7
+      ]
+      this.svg.attr('viewBox', `0 0 ${canvasSize[0]} ${canvasSize[1]}`)
+
+      this.svg.append('line')
+          .attr('class', `line`)
+          .attr('x1', 0)
+          .attr('y1', 0)
+          .attr('x2', canvasSize[0])
+          .attr('y2', canvasSize[1])
+
       // Add a bit margin
       var game = this.svg.append('g')
-        .attr('transform', 'translate(10, 10)')
+        .attr('transform', `translate(${cellMargin + 5}, ${cellMargin + 5})`)
 
       const addLine = (cell, type, id, x1, y1, x2, y2) => {
         const lineG = cell.append('g')
@@ -501,6 +514,7 @@ export default {
           .attr('transform', () => {
             return 'translate(0, ' + cellWidth * i + ')'
           })
+
         for (var j = 0; j < gridSize; j++) {
           cell = row.append('g')
             .attr('class', 'col')
@@ -513,8 +527,8 @@ export default {
             .attr('class', 'cell')
             .attr('width', cellWidth)
             .attr('height', cellWidth)
-            .attr('x', cellMargin - 3)
-            .attr('y', cellMargin - 3)
+            .attr('x', 0)
+            .attr('y', 0)
             .attr('id', i + '-' + j)
 
           // Add lines
@@ -1164,7 +1178,7 @@ export default {
 }
 
 #game {
-  width: 97%;
+  width: 100%;
   height: 100%;
 }
 
