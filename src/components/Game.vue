@@ -1168,13 +1168,11 @@ export default {
 }
 
 #game-wrapper {
-  height: 60vh;
   margin: 20px auto 10px;
 }
 
 #game {
-  width: 100%;
-  height: 100%;
+  max-height: 70vh;
 }
 
 svg {
@@ -1242,7 +1240,6 @@ svg text::selection {
     padding: 15px 10px;
   }
   #game-wrapper {
-    margin-top: 0;
     margin-bottom: 0;
   }
 }
