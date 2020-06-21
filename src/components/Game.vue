@@ -25,9 +25,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <nav class='level is-mobile'>
           <div class='level-left'>
             <span class='level-item'>
-              <router-link to='/' class='button'>Vett !</router-link>
+              <router-link to='/' class='has-text-white is-size-4'>Vett !</router-link>
               &nbsp;&nbsp;
-              <span class='has-text-weight-bold' title='Game Code'>{{ gameCode }}</span>
+              <span class='button is-small has-text-weight-bold' title='Game Code. Click to copy' v-clipboard='gameCode'>{{ gameCode }}</span>
             </span>
           </div>
           <span class='level-item has-text-centered'>{{ status }}</span>
@@ -468,11 +468,11 @@ export default {
           .attr('stroke-linecap', 'round')
           .attr('id', id)
 
-        // Add a path for easy click
-
+        // Add a traingular area for easy click on line
         let lineArea = ''
-        const midPoint = cellWidth / 2.8284 // cellWidth / (2*sqrt(2))
+        const midPoint = cellWidth / 2.8284 // (cellWidth/2) / sin(45)
         if (type === 'v') {
+          // l is relative, L & M is absolute
           lineArea = `M${x1},${y1}` +
                     'l' + midPoint + ',' + midPoint +
                     `L${x2},${y2}` +
@@ -1223,5 +1223,18 @@ svg text::selection {
 
 #countdown-circle {
   stroke-dasharray: 440; /* this value is the pixel circumference of the circle */
+}
+
+@media screen and (max-width: 700px) {
+  #header {
+    padding: 0;
+  }
+  #header .container {
+    padding: 15px 10px;
+  }
+  #game-wrapper {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
 }
 </style>
