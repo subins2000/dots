@@ -618,14 +618,14 @@ export default {
         return false
       }
 
+      this.activateLine(lineElem, this.myID)
+
       this.sendToAll({
         type: 'move',
         playerID: this.myID,
         line: lineElem.classList.contains('hline') ? 'h' : 'v',
         move: lineElem.id
       })
-
-      this.activateLine(lineElem, this.myID)
     },
 
     activateLine (line, playerID, playAudio = true, historyIndex = false) {
