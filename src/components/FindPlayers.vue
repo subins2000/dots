@@ -33,7 +33,6 @@ export default {
   methods: {
     init () {
       this.p2pt = new P2PT(this.$GAME_ANNOUNCE_URLS, 'vett')
-      this.p2pt.start()
 
       var myDiceNumber = parseInt(Math.random().toString().substr(2, 5))
 
@@ -96,18 +95,22 @@ export default {
         }
       })
 
-      var warningCount = 0
+      let connected = false
+      let warningCount = 0
       this.p2pt.on('trackerwarning', (error, stats) => {
         warningCount++
-        if (warningCount >= stats.total) {
+        if (warningCount >= stats.total && !connected) {
           this.status = 'Have no connections to torrent trackers. Perhaps reload page or make sure WebTorrent trackers are not blocked by your ISP'
         }
       })
 
       this.p2pt.on('trackerconnect', () => {
+        connected = true
         warningCount--
         this.status = 'Searching for online players...'
       })
+
+      this.p2pt.start()
     },
 
     startGame (peer) {
