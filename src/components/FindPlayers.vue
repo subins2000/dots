@@ -111,6 +111,8 @@ export default {
       })
 
       this.p2pt.start()
+
+      window.p2pt = this.p2pt
     },
 
     startGame (peer) {
