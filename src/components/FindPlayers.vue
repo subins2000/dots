@@ -88,7 +88,7 @@ export default {
 
           let [blah, gameCode] = msg.split('-')
 
-          if (gameCode.length === this.$GAME_CODE_LENGTH) {
+          if (this.isGameCodeValid(gameCode)) {
             localStorage.setItem('gameCode', gameCode)
             this.$router.push('register')
           }
@@ -111,6 +111,8 @@ export default {
       })
 
       this.p2pt.start()
+
+      window.p2pt = this.p2pt
     },
 
     startGame (peer) {

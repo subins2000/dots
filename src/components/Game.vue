@@ -449,6 +449,8 @@ export default {
       this.p2pt.on('trackerconnect', () => {
         trackerConnected = true
       })
+
+      window.p2pt = this.p2pt
     },
 
     makeGameBoard () {
