@@ -70,10 +70,20 @@ var announceURLs = [
 ]
 
 if (window.location.hostname === 'localhost') {
-  announceURLs = ['ws://localhost:5000']
+  announceURLs = ['ws://localhost:8085']
 }
 
 Vue.prototype.$GAME_ANNOUNCE_URLS = announceURLs
+
+// For adding a new tracker
+window.$ADD_TRACKER = function (trackerURL) {
+  if (announceURLs.indexOf(trackerURL) === -1) {
+    if (window.p2pt) {
+      window.p2pt.addTracker(trackerURL)
+    }
+    announceURLs.push(trackerURL)
+  }
+}
 
 const store = new Vuex.Store({
   state: {
