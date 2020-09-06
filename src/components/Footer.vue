@@ -17,7 +17,6 @@
         </div>
       </div>
     </nav>
-    <a href='https://subinsb.com/donate' target='_blank' class='button is-medium is-success'>Help Sustain This Game : Donate</a>
   </footer>
 </template>
 
