@@ -64,6 +64,7 @@ Vue.prototype.isGameCodeValid = (gameCode) => {
 var announceURLs = [
   'wss://wsswt.herokuapp.com/',
   'wss://tracker.openwebtorrent.com',
+  'ws://127.0.0.1:8085',
   'wss://tracker.sloppyta.co:443/announce',
   'wss://tracker.novage.com.ua:443/announce',
   'wss://tracker.btorrent.xyz:443/announce'
