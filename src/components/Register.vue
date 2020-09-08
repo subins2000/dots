@@ -28,7 +28,7 @@ export default {
   methods: {
     playGame (e) {
       e.preventDefault()
-      
+
       if (this.playerName.trim() === '') {
         this.$buefy.toast.open({
           message: 'Name cannot be blank',

@@ -47,7 +47,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
       <div class='content' id='game-wrapper'>
         <svg id='game' ref='game' viewBox='0 0 260 260' preserveAspectRatio='xMidYMid meet'></svg>
         <div class='is-hidden'>
-          <audio v-for='a in audio' v-bind:id='"audio-" + a' v-bind:ref='"audio-" + a' async='async'>
+          <audio v-for='a in audio' :key='a' v-bind:id='"audio-" + a' v-bind:ref='"audio-" + a' async='async'>
             <source v-bind:src='"static/" + a + ".ogg"' type='audio/ogg'>
           </audio>
         </div>
@@ -76,8 +76,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
           </div>
         </div>
         <table class='table scoreboard content'>
-          <tbody>
-            <tr v-for='pid in playerOrder' v-bind:style='"border: 3px dashed var(--playercolor-" + pid + ")"' v-bind:class='playerTurns[pid] ? "turnnow" : ""' v-bind:key='pid' v-if='reRenderScoreboard'>
+          <tbody v-if='reRenderScoreboard'>
+            <tr v-for='pid in playerOrder' v-bind:style='"border: 3px dashed var(--playercolor-" + pid + ")"' v-bind:class='playerTurns[pid] ? "turnnow" : ""' v-bind:key='pid'>
               <td>{{ players[pid].name }}</td>
               <td><span class="score">{{ players[pid].score }}</span></td>
             </tr>
@@ -92,7 +92,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             </div>
             <div v-else-if='gameStatus === "win"'>
               <h3 class='is-size-3'>You win !</h3>
-              <p>You won the game ! 🥳🥳</p>
+              <p>You won the game ! 🎉🎉🎉</p>
             </div>
             <div v-else>
               <h3 class='is-size-3'>You lost !</h3>
@@ -120,7 +120,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
       <template v-slot:text-message-body="scopedProps">
         <p class='sc-message--system' v-if='scopedProps.message.author !== "!game!" && scopedProps.message.author !== "me"'>
           <strong>{{ scopedProps.message.author }}</strong>
-          <div style='margin: 3px;'></div>
+          <br style='margin: 3px;' />
         </p>
         <p class="sc-message--text-content" v-html="scopedProps.messageText"></p>
         <p v-if="scopedProps.message.data.meta" class='sc-message--meta' :style="{color: scopedProps.messageColors.color}">{{scopedProps.message.data.meta}}</p>
@@ -144,7 +144,7 @@ var gridSize = [6, 6]
 var cellWidth = 40
 var cellMargin = 5
 
-let turnTimerFullOffset = 440
+const turnTimerFullOffset = 440
 
 /**
  * Storage for restoring gamestate if needed
@@ -156,13 +156,13 @@ export default {
   name: 'Game',
 
   p2pt: null,
-  myID: '',
   turnTimer: null,
 
   data () {
     return {
       status: 'Waiting for players...',
       myName: this.$store.state.name,
+      myID: 0,
 
       curPlayerID: null,
       myTurn: false,
@@ -266,12 +266,12 @@ export default {
   watch: {
     playerTurns: {
       deep: true,
-      
+
       handler () {
         this.curPlayerID = this.playerTurns.indexOf(true)
-        this.myTurn = this.curPlayerID == this.myID
+        this.myTurn = this.curPlayerID === this.myID
 
-        if (this.myTurn && this.gameHistoryIndex > 0 && this.gameHistory[this.gameHistoryIndex][0] != this.myID && this.chatIsOpen) {
+        if (this.myTurn && this.gameHistoryIndex > 0 && this.gameHistory[this.gameHistoryIndex][0] !== this.myID && this.chatIsOpen) {
           this.$buefy.toast.open({
             message: 'It\'s your turn now !',
             type: 'is-success'
@@ -300,7 +300,7 @@ export default {
         sessionStorage.setItem('myColor', randomColor())
       }
 
-      this.myID = sessionStorage.getItem('myID')
+      this.myID = parseInt(sessionStorage.getItem('myID'))
 
       this.players[this.myID] = {
         name: this.myName,
@@ -428,12 +428,12 @@ export default {
           }
         }
       })
-    
+
       let warningCount = 0
       let trackerConnected = false
-      this.p2pt.on('trackerwarning', (error, stats) => {
+      this.p2pt.on('trackerwarning', (_, stats) => {
         warningCount++
-        
+
         if (warningCount >= stats.total && !trackerConnected) {
           $this.status = 'Cannot connect to WebTorrent trackers'
 
@@ -530,7 +530,7 @@ export default {
           // Add lines
           addLine(cell, 'v', i + '-' + j, 0, cellMargin, 0, cellWidth - cellMargin)
           addLine(cell, 'h', i + '-' + j, cellMargin, 0, cellWidth - cellMargin, 0)
-          
+
           cell.append('circle')
             .attr('class', 'dot')
             // .attr('opacity', '0')
@@ -539,7 +539,7 @@ export default {
             .attr('r', cellMargin)
 
           // Add horizontal line below last row elems
-          if (i == gridSize[0] - 1) {
+          if (i === gridSize[0] - 1) {
             addLine(cell, 'h', (i + 1) + '-' + j, cellMargin, cellWidth, cellWidth - cellMargin, cellWidth)
 
             cell.append('circle')
@@ -550,7 +550,7 @@ export default {
           }
 
           // Add vertical line on right of last column elems
-          if (j == gridSize[1] - 1) {
+          if (j === gridSize[1] - 1) {
             addLine(cell, 'v', i + '-' + (j + 1), cellWidth, cellMargin, cellWidth, cellWidth - cellMargin)
 
             cell.append('circle')
@@ -558,7 +558,7 @@ export default {
               .attr('cx', cellWidth)
               .attr('cy', 0)
               .attr('r', cellMargin)
-            
+
             // The last dot in the bottom-right corner
             cell.append('circle')
               .attr('class', 'dot')
@@ -671,10 +671,10 @@ export default {
 
       for (var id in completedBoxes) {
         box = completedBoxes[id]
-        
+
         if (box) {
           box = this.game.querySelector('.cell[id="' + id + '"]')
-          
+
           box.classList.add('active')
           box.playerID = playerID
           box.style.fill = `var(--playercolor-${playerID})`
@@ -713,14 +713,14 @@ export default {
 
             var largestScore = 0
             var smallestScore = Infinity
-            
+
             var player
             for (var i in this.players) {
               player = this.players[i]
               if (player.score > largestScore) {
                 largestScore = player.score
               }
-              
+
               if (player.score < smallestScore) {
                 smallestScore = player.score
               }
@@ -741,8 +741,7 @@ export default {
 
       this.fixPlayerTurns()
 
-      if (playAudio)
-        this.playAudio(audioToPlay)
+      if (playAudio) { this.playAudio(audioToPlay) }
     },
 
     boxComplete (activeLine) {
@@ -843,25 +842,22 @@ export default {
       return consideringBoxes
     },
 
-    copyGameCode() {
+    copyGameCode () {
       this.$buefy.toast.open({
         duration: 2000,
-        message: `Game Code Copied !`,
+        message: 'Game Code Copied !',
         position: 'is-bottom',
         type: 'is-success'
       })
     },
 
     playAudio (audioID) {
-      if (this.$store.state.audio)
-        this.$refs['audio-' + audioID][0].play()
+      if (this.$store.state.audio) { this.$refs['audio-' + audioID][0].play() }
     },
 
     playAgain () {
-      var players = this.players
-
       this.sendToAll({
-        'type': 'playagain'
+        type: 'playagain'
       })
 
       this.$buefy.toast.open({
@@ -884,7 +880,7 @@ export default {
     },
 
     sendToAll (json) {
-      var player;
+      var player
       for (var id in this.players) {
         player = this.players[id]
 
@@ -896,8 +892,8 @@ export default {
     },
 
     restoreGameState (history) {
-      for (let historyIndex in history) {
-        let h = history[historyIndex] // [playerID, lineType, lineID]
+      for (const historyIndex in history) {
+        const h = history[historyIndex] // [playerID, lineType, lineID]
 
         if (h[1] === '') {
           this.gameHistory[historyIndex] = [h[0], '', '']
@@ -919,7 +915,7 @@ export default {
       if (!restoreGameData) {
         return false
       }
-      
+
       // Only restore if all online, active players info is obtained. Otherwise this.players object will be incomplete and activateLine() will fail
       if (this.expectingPlayerCount > this.playerOrder.length) {
         this.p2pt.requestMorePeers()
@@ -936,11 +932,11 @@ export default {
 
     // Recalculate scores
     updateScores () {
-      let markedBoxes = Array.from(this.game.getElementsByClassName('cell active'))
+      const markedBoxes = Array.from(this.game.getElementsByClassName('cell active'))
 
-      let playerScores = []
+      const playerScores = []
 
-      for (let playerID in this.playerTurns) {
+      for (const playerID in this.playerTurns) {
         playerScores[playerID] = 0
       }
 
@@ -949,8 +945,8 @@ export default {
       })
 
       // Subtract scores from turn timeouts
-      for (let historyIndex in this.gameHistory) {
-        let h = this.gameHistory[historyIndex] // [playerID, lineType, lineID]
+      for (const historyIndex in this.gameHistory) {
+        const h = this.gameHistory[historyIndex] // [playerID, lineType, lineID]
 
         // If the turn caused a timeout, lineType will be null string
         if (h[1] === '') {
@@ -958,7 +954,7 @@ export default {
         }
       }
 
-      for (let playerID in playerScores) {
+      for (const playerID in playerScores) {
         this.players[playerID].score = playerScores[playerID]
       }
     },
@@ -967,18 +963,18 @@ export default {
      * Calculate whose turn is it next
      * and change playerTurns array accordingly
      */
-     fixPlayerTurns () {
+    fixPlayerTurns () {
       let i = 0
       for (const playerID in this.playerTurns) {
         this.playerTurns[playerID] = false
-        
-        let color = playerColors[i] || randomColor()
+
+        const color = playerColors[i] || randomColor()
         // set style of player
         gameStyle.setProperty('--playercolor-' + playerID, color)
         i++
       }
 
-      var nextPlayerID;
+      var nextPlayerID
 
       if (this.gameHistoryIndex === -1) {
         // First player in list has the turn
@@ -1139,7 +1135,7 @@ export default {
     window.addEventListener('beforeunload', this.onBeforeUnload)
   },
 
-  beforeDestroy() {
+  beforeDestroy () {
     if (this.p2pt) {
       this.p2pt.destroy()
       this.svg.selectAll('*').remove()

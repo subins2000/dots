@@ -6,7 +6,7 @@
         <div class='content'>
           <p>Choose a grid size (rows x columns) :</p>
           <div class='gridSizes'>
-            <div class='gridSize' v-for='size in gridSizes'>
+            <div class='gridSize' v-for='size in gridSizes' :key='size'>
               <b-radio-button v-model='gridSize'
                 :native-value='size'
                 type='is-success'>
@@ -52,7 +52,7 @@ export default {
       e.preventDefault()
 
       let gridSize = this.gridSize
-      
+
       if (gridSize === 'custom') {
         const x = this.customSizeX
         const y = this.customSizeY

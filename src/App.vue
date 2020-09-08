@@ -13,7 +13,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400&display=swap');
+// @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400&display=swap');
 
 #app {
   font-family: 'Ubuntu', sans-serif;

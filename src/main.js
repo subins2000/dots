@@ -50,7 +50,7 @@ Vue.prototype.isGameCodeValid = (gameCode) => {
     x = parseInt(x)
     y = parseInt(y)
 
-    if (x < 2 || y < 2) {
+    if (x < 1 || y < 1) {
       return false
     }
 
