@@ -25,7 +25,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <nav class='level is-mobile'>
           <div class='level-left'>
             <span class='level-item'>
-              <router-link to='/' class='has-text-white is-size-4'>Vett !</router-link>
+              <router-link to='/' class='has-text-white is-size-4'>Dots !</router-link>
             </span>
             <span class='button is-small has-text-weight-bold' title='Game Code. Click to copy' v-clipboard='gameCode' @click='copyGameCode'>{{ gameCode }}</span>
           </div>

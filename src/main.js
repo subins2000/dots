@@ -4,7 +4,12 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import VueClipboard from 'vue-clipboard2'
 
-import Buefy from 'buefy'
+import Button from 'buefy/dist/components/button'
+import Checkbox from 'buefy/dist/components/checkbox'
+import Input from 'buefy/dist/components/input'
+import Radio from 'buefy/dist/components/radio'
+import Toast from 'buefy/dist/components/toast'
+import Snackbar from 'buefy/dist/components/snackbar'
 
 import Chat from 'vue-beautiful-chat'
 
@@ -15,7 +20,12 @@ import CopyLink from './components/CopyLink.vue'
 import GameTitle from './components/GameTitle.vue'
 import Footer from './components/Footer.vue'
 
-Vue.use(Buefy)
+Vue.use(Button)
+Vue.use(Checkbox)
+Vue.use(Input)
+Vue.use(Radio)
+Vue.use(Toast)
+Vue.use(Snackbar)
 Vue.use(Chat)
 Vue.use(Vuex)
 

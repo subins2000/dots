@@ -70,6 +70,9 @@ $speed-slower: 250ms !default
 @import "~buefy/src/scss/utils/_animations.scss";
 @import "~buefy/src/scss/components/_notices.scss";
 
+@import "~buefy/src/scss/utils/_functions.scss";
+@import "~buefy/src/scss/components/checkbox.scss";
+
 .slide-fade-enter-active {
   transition: all .3s ease;
 }
