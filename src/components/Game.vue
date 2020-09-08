@@ -26,9 +26,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
           <div class='level-left'>
             <span class='level-item'>
               <router-link to='/' class='has-text-white is-size-4'>Vett !</router-link>
-              &nbsp;&nbsp;
-              <span class='button is-small has-text-weight-bold' title='Game Code. Click to copy' v-clipboard='gameCode' @click='copyGameCode'>{{ gameCode }}</span>
             </span>
+            <span class='button is-small has-text-weight-bold' title='Game Code. Click to copy' v-clipboard='gameCode' @click='copyGameCode'>{{ gameCode }}</span>
           </div>
           <span class='level-item has-text-centered'>{{ status }}</span>
           <div class='level-right' style='text-align: right;'>
@@ -1157,7 +1156,7 @@ export default {
 <!-- Add 'scoped' attribute to limit CSS to this component only -->
 <style>
 #header {
-  padding: 1em;
+  padding: 1.25em;
   color: #fff;
 }
 
