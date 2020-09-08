@@ -54,6 +54,7 @@ export default {
               this.status = 'Found a player ! Handshaking...'
             }
           }).catch((error) => {
+            console.log(error)
             this.status = 'Failed connecting to a player. Trying again...'
 
             this.offer = false
@@ -69,15 +70,15 @@ export default {
         if (action === 'play' && !this.offer) {
           this.offer = peer.id
 
-          let [blah, peerDiceNumber] = msg.split('-')
+          let [, peerDiceNumber] = msg.split('-')
           peerDiceNumber = parseInt(peerDiceNumber)
-          
+
           if (myDiceNumber > peerDiceNumber) {
             this.$refs.foundPlayerAudio.play()
 
             // I will decide the game code
             this.startGame(peer)
-            
+
             this.status = 'Found a player ! Handshaking with sanitized hands...'
           }
         } else if (action === 'strt') {
@@ -86,7 +87,7 @@ export default {
           this.$refs.foundPlayerAudio.play()
           this.status = 'Found a player ! Handshaking with sanitized hands...'
 
-          let [blah, gameCode] = msg.split('-')
+          const [, gameCode] = msg.split('-')
 
           if (this.isGameCodeValid(gameCode)) {
             localStorage.setItem('gameCode', gameCode)
@@ -97,7 +98,7 @@ export default {
 
       let connected = false
       let warningCount = 0
-      this.p2pt.on('trackerwarning', (error, stats) => {
+      this.p2pt.on('trackerwarning', (_, stats) => {
         warningCount++
         if (warningCount >= stats.total && !connected) {
           this.status = 'Have no connections to torrent trackers. Perhaps reload page or make sure WebTorrent trackers are not blocked by your ISP'
@@ -116,7 +117,7 @@ export default {
     },
 
     startGame (peer) {
-      let gameCode = '6x6.' + Math.random().toString(36).substr(2, this.$GAME_CODE_LENGTH)
+      const gameCode = '6x6.' + Math.random().toString(36).substr(2, this.$GAME_CODE_LENGTH)
 
       localStorage.setItem('gameCode', gameCode)
 
@@ -129,8 +130,9 @@ export default {
       this.p2pt.send(
         peer, 'strt-' + gameCode
       ).catch((error) => {
+        console.log(error)
         failed = true
-        
+
         this.status = 'Failed connecting to a player. Trying again...\nA page refresh might help'
 
         this.offer = false
@@ -143,7 +145,7 @@ export default {
     this.init()
   },
 
-  beforeDestroy() {
+  beforeDestroy () {
     if (this.p2pt) {
       this.p2pt.destroy()
     }

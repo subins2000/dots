@@ -26,11 +26,11 @@ export default {
     copyGameLink () {
       this.$buefy.toast.open({
         duration: 2000,
-        message: `Invite Link Copied !`,
+        message: 'Invite Link Copied !',
         position: 'is-top',
         type: 'is-success'
       })
-    },
+    }
   }
 }
 </script>

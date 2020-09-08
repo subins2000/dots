@@ -1,7 +1,7 @@
 <template>
   <div>
     <GameTitle />
-    <div class='container has-text-centered'>  
+    <div class='container has-text-centered'>
       <br/>
       <div class='content'>
         <div class='columns'>
