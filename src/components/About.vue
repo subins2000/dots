@@ -17,7 +17,7 @@
           <p>No personal information about you, or identifiable information about you is shared with anyone. Only the name you type in will be shared to other players in the game.</p>
           <li>Why the name "Vett" ?</li>
           <p>The game is called "Poojyam <b>Vett</b>" in the language Malayalam.</p>
-        <li>What if the game gets interrupted and user reloads?</li>
+          <li>What if the game gets interrupted and user reloads?</li>
           <p>The other player(s) will send the game state to this user and help restoring the game</p>
   </ul>
         <div class='has-text-centered'>
