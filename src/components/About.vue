@@ -17,7 +17,9 @@
           <p>No personal information about you, or identifiable information about you is shared with anyone. Only the name you type in will be shared to other players in the game.</p>
           <li>Why the name "Vett" ?</li>
           <p>The game is called "Poojyam <b>Vett</b>" in the language Malayalam.</p>
-        </ul>
+        <li>What if the game gets interrupted and user reloads?</li>
+          <p>The other player(s) will send the game state to this user and help restoring the game</p>
+  </ul>
         <div class='has-text-centered'>
           Made by&nbsp;<a href='https://twitter.com/SubinSiby'>Subin Siby</a>&nbsp;and&nbsp;<a href='https://github.com/athul'>Athul Cyriac Ajay</a><br/>
           <a href='https://github.com/subins2000/vett'>Source Code </a>&nbsp;
