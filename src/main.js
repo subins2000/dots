@@ -44,7 +44,7 @@ Vue.directive('focus', {
 })
 
 Vue.prototype.$GAME_CODE_LENGTH = 4
-Vue.prototype.$GAME_INVITE_LINK = 'https://vett.space/#/?g='
+Vue.prototype.$GAME_INVITE_LINK = 'https://dots.subinsb.com/#/?g='
 Vue.prototype.$GAME_TURN_TIME = 15 // in seconds
 
 Vue.prototype.isGameCodeValid = (gameCode) => {
@@ -78,6 +78,7 @@ var announceURLs = [
   'wss://tracker.sloppyta.co:443/announce',
   'wss://tracker.novage.com.ua:443/announce',
   'wss://tracker.btorrent.xyz:443/announce'
+  // 'ws://192.168.43.64:8085'
 ]
 
 if (window.location.hostname === 'localhost') {
