@@ -34,7 +34,7 @@ export default {
 }
 
 // Import Bulma's core
-@import "~bulma/sass/utilities/_all";
+@import "bulma/sass/utilities/_all";
 
 // Set your colors
 $primary: #8c67ef;
@@ -62,16 +62,15 @@ $link-invert: $primary-invert;
 $link-focus-border: $primary;
 
 // For buefy
-$speed-slow: 150ms !default
-$speed-slower: 250ms !default
+$speed-slow: 150ms !default;
+$speed-slower: 250ms !default;
 
 // Import Bulma and Buefy styles
-@import "~bulma";
-@import "~buefy/src/scss/utils/_animations.scss";
-@import "~buefy/src/scss/components/_notices.scss";
+@import "bulma/bulma";
+@import "buefy/src/scss/utils/_animations.scss";
+@import "buefy/src/scss/components/_notices.scss";
 
-@import "~buefy/src/scss/utils/_functions.scss";
-@import "~buefy/src/scss/components/checkbox.scss";
+@import "buefy/src/scss/utils/_functions.scss";
 
 .slide-fade-enter-active {
   transition: all .3s ease;

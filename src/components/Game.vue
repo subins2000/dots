@@ -47,7 +47,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <svg id='game' ref='game' viewBox='0 0 260 260' preserveAspectRatio='xMidYMid meet'></svg>
         <div class='is-hidden'>
           <audio v-for='a in audio' :key='a' v-bind:id='"audio-" + a' v-bind:ref='"audio-" + a' async='async'>
-            <source v-bind:src='"static/" + a + ".ogg"' type='audio/ogg'>
+            <source v-bind:src='"/static/" + a + ".ogg"' type='audio/ogg'>
           </audio>
         </div>
       </div>
@@ -130,7 +130,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script>
 import * as d3 from 'd3'
-const P2PT = require('p2pt')
+import P2PT from 'p2pt'
 
 const randomColor = () => {
   return `hsla(${~~(360 * Math.random())},70%,50%,0.8)`
@@ -214,7 +214,7 @@ export default {
         {
           id: '!game!',
           name: 'Game',
-          imageUrl: 'static/favicon.png'
+          imageUrl: '/static/favicon.png'
         }
       ],
 
@@ -377,7 +377,7 @@ export default {
           $this.chatParticipants.push({
             id: msg.name,
             name: msg.name,
-            imageUrl: 'static/avatar.png'
+            imageUrl: '/static/avatar.png'
           })
 
           if (msg.historyIndex > $this.gameHistoryIndex) {

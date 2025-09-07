@@ -6,16 +6,17 @@
   "license": "AGPL-3.0",
   "author": "subins2000",
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "@beyonk/google-fonts-webpack-plugin": "^1.5.0",
     "buefy": "^0.9.3",
-    "core-js": "^3.6.5",
+    "bulma": "^0.9.4",
     "d3": "^6.1.1",
-    "p2pt": "^1.5.0",
+    "events": "^3.3.0",
+    "p2pt": "^1.6.1",
     "vue": "^2.6.11",
     "vue-beautiful-chat": "^2.5.0",
     "vue-clipboard2": "^0.3.1",
@@ -23,21 +24,20 @@
     "vuex": "^3.5.1"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^6.2.2",
-    "node-sass": "^4.14.1",
-    "sass-loader": "^10.0.2",
-    "standard": "^14.3.4",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.19.2",
+    "sass": "^1.69.5",
+    "standard": "^17.1.0",
+    "vite": "^4.5.3",
+    "vite-plugin-vue2": "^2.0.3",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
     "root": true,
     "env": {
-      "node": true
+      "node": true,
+      "browser": true,
+      "es2022": true
     },
     "extends": [
       "plugin:vue/essential",
@@ -45,7 +45,8 @@
       "standard"
     ],
     "parserOptions": {
-      "parser": "babel-eslint"
+      "ecmaVersion": "latest",
+      "sourceType": "module"
     },
     "rules": {}
   },

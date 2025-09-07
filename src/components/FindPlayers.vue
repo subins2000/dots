@@ -7,7 +7,7 @@
       <p>Found {{ count }} online players</p>
       <div class='is-hidden'>
         <audio ref='foundPlayerAudio' async='async'>
-          <source src='static/box.ogg' type='audio/ogg'>
+          <source src='/static/box.ogg' type='audio/ogg'>
         </audio>
       </div>
     </div>
@@ -15,7 +15,7 @@
 </template>
 
 <script>
-const P2PT = require('p2pt')
+import P2PT from 'p2pt'
 
 export default {
   name: 'FindPlayers',

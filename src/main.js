@@ -1,5 +1,3 @@
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import Vuex from 'vuex'
 import VueClipboard from 'vue-clipboard2'
@@ -13,7 +11,7 @@ import Snackbar from 'buefy/dist/components/snackbar'
 
 import Chat from 'vue-beautiful-chat'
 
-import App from './App'
+import App from './App.vue'
 import router from './router'
 
 import CopyLink from './components/CopyLink.vue'
@@ -74,7 +72,7 @@ Vue.prototype.isGameCodeValid = (gameCode) => {
 var announceURLs = [
   'wss://wsswt.herokuapp.com/',
   'wss://tracker.openwebtorrent.com',
-  'ws://127.0.0.1:8085',
+  'ws://127.0.0.1:5000',
   'wss://tracker.sloppyta.co:443/announce',
   'wss://tracker.novage.com.ua:443/announce',
   'wss://tracker.btorrent.xyz:443/announce'
@@ -82,7 +80,7 @@ var announceURLs = [
 ]
 
 if (window.location.hostname === 'localhost') {
-  announceURLs = ['ws://localhost:8085']
+  announceURLs = ['ws://localhost:5000']
 }
 
 Vue.prototype.$GAME_ANNOUNCE_URLS = announceURLs
@@ -135,6 +133,5 @@ new Vue({
   el: '#app',
   router,
   store,
-  components: { App },
-  template: '<App/>'
+  render: h => h(App)
 })
