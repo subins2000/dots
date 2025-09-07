@@ -11,11 +11,11 @@ Built with VueJS, d3.js, [P2PT](//github.com/subins2000/p2pt). Uses WebTorrent t
 ## Build Setup
 
 ```
-yarn install
-yarn start
+npm i
+npm run dev
 ```
 
-Trackers list is included in `src/components/Game.vue`. You may want to change that or add your own [local tracker](https://github.com/subins2000/p2pt/blob/master/startTracker.js) for development.
+Trackers list is included in `src/components/Game.vue`. You may want to change that or add your own [local tracker](https://github.com/subins2000/p2pt/blob/master/start-tracker.js) for development.
 
 ## Thanks
 
